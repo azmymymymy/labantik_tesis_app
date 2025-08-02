@@ -1,4 +1,3 @@
-@include('layouts.header')
 <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet">
 <style>
     * {
@@ -524,4 +523,3 @@
         if (window.feather) feather.replace();
     });
 </script>
-@include('layouts.footer')
