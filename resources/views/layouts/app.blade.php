@@ -1,39 +1,3 @@
-dashboard.blade.php
-327 baris
-
-php
-
-pisahkan footer,header,sidebar,topbarnya, buatkan saya masternya, saya pake laravel 11, lalu buatkan dashboardnya juga
-
-Saya akan membantu Anda memisahkan komponen-komponen dari template dan membuat struktur master layout untuk Laravel 11.
-Mari kita buat file-file yang terorganisir dengan baik.
-
-
-Master Layout - app.blade.php
-Kode
-
-Header Partial - header.blade.php
-Kode
-
-Sidebar Partial - sidebar.blade.php
-Kode
-
-Footer Partial - footer.blade.php
-Kode
-
-Dashboard View - dashboard.blade.php
-Kode
-
-
-
-Lanjutkan
-
-
-Dashboard View - dashboard.blade.php
-Kode
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -164,7 +128,13 @@ Kode
     <script src="{{ asset('assets/js/datepicker/date-picker/datepicker.custom.js') }}"></script>
     <!-- Theme js-->
     <script src="{{ asset('assets/js/script.js') }}"></script>
-    <script src="{{ asset('assets/js/theme-customizer/customizer.js') }}"></script>
+    <script src="{{ asset('assets/js/theme-customizer/customizer.js') }}">
+        document.querySelectorAll('.nav-link.menu-title').forEach(function(el) {
+            el.addEventListener('touchstart', function(e) {
+                el.click();
+            });
+        });
+    </script>
 
     @stack('scripts')
 </body>

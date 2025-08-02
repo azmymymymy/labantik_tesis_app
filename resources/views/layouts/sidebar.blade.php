@@ -26,13 +26,13 @@
             </li>
         </ul>
     </div>
-    
+
     <nav>
         <div class="main-navbar">
             <div class="left-arrow" id="left-arrow">
                 <i data-feather="arrow-left"></i>
             </div>
-            
+
             <div id="mainnav">
                 <ul class="nav-menu custom-scrollbar">
                     <li class="back-btn">
@@ -41,13 +41,13 @@
                             <i class="fa fa-angle-right ps-2" aria-hidden="true"></i>
                         </div>
                     </li>
-                    
+
                     <li class="sidebar-main-title">
                         <div>
                             <h6>General</h6>
                         </div>
                     </li>
-                    
+
                     <!-- Dashboard Menu Only -->
                     <li class="dropdown {{ request()->routeIs('dashboard*') ? 'active' : '' }}">
                         <a class="nav-link menu-title" href="javascript:void(0)">
@@ -56,12 +56,14 @@
                         </a>
                         <ul class="nav-submenu menu-content">
                             <li>
-                                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                                <a href="{{ route('dashboard') }}"
+                                    class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
                                     Default
                                 </a>
                             </li>
                             <li>
-                                <a href="" class="{{ request()->routeIs('dashboard.ecommerce') ? 'active' : '' }}">
+                                <a href=""
+                                    class="{{ request()->routeIs('dashboard.ecommerce') ? 'active' : '' }}">
                                     Ecommerce
                                 </a>
                             </li>
@@ -69,7 +71,7 @@
                     </li>
                 </ul>
             </div>
-            
+
             <div class="right-arrow" id="right-arrow">
                 <i data-feather="arrow-right"></i>
             </div>

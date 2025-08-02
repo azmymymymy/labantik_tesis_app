@@ -1,3 +1,4 @@
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet">
 <style>
     * {
@@ -365,11 +366,7 @@
         <form id="registerForm" method="POST" action="{{ route('register') }}">
             @csrf
             <h1 class="title">Create Account</h1>
-            <div class="social-container">
-                <a href="#" class="social"><i data-feather="facebook"></i></a>
-                <a href="#" class="social"><i data-feather="twitter"></i></a>
-                <a href="#" class="social"><i data-feather="linkedin"></i></a>
-            </div>
+            
             <div class="input-icon"><i data-feather="user"></i><input type="text" name="username"
                     placeholder="Username" value="{{ old('username') }}" required /></div>
             <span class="text-danger small error-username"></span>
@@ -394,11 +391,7 @@
         <form method="POST" action="{{ route('login') }}">
             @csrf
             <h1 class="title">Sign in</h1>
-            <div class="social-container">
-                <a href="#" class="social"><i data-feather="facebook"></i></a>
-                <a href="#" class="social"><i data-feather="twitter"></i></a>
-                <a href="#" class="social"><i data-feather="linkedin"></i></a>
-            </div>
+            
             <div class="input-icon"><i data-feather="user"></i><input type="text" name="username"
                     placeholder="Username" value="{{ old('username') }}" required /></div>
             @error('username')
