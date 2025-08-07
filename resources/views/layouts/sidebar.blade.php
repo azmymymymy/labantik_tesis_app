@@ -58,13 +58,13 @@
                             <li>
                                 <a href="{{ route('dashboard') }}"
                                     class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                                    Default
+                                    Dashboard
                                 </a>
                             </li>
                             <li>
-                                <a href=""
-                                    class="{{ request()->routeIs('dashboard.ecommerce') ? 'active' : '' }}">
-                                    Ecommerce
+                                <a href="{{ route('siswa.index') }}"
+                                    class="{{ request()->routeIs('siswa') ? 'active' : '' }}">
+                                    Siswa
                                 </a>
                             </li>
                         </ul>

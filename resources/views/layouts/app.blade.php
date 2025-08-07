@@ -122,19 +122,19 @@
     <script src="{{ asset('assets/js/vector-map/map/jquery-jvectormap-in-mill.js') }}"></script>
     <script src="{{ asset('assets/js/vector-map/map/jquery-jvectormap-asia-mill.js') }}"></script>
     <script src="{{ asset('assets/js/dashboard/default.js') }}"></script>
-    <script src="{{ asset('assets/js/notify/index.js') }}"></script>
+    {{-- <script src="{{ asset('assets/js/notify/index.js') }}"></script> --}}
     <script src="{{ asset('assets/js/datepicker/date-picker/datepicker.js') }}"></script>
     <script src="{{ asset('assets/js/datepicker/date-picker/datepicker.en.js') }}"></script>
     <script src="{{ asset('assets/js/datepicker/date-picker/datepicker.custom.js') }}"></script>
     <!-- Theme js-->
     <script src="{{ asset('assets/js/script.js') }}"></script>
-    <script src="{{ asset('assets/js/theme-customizer/customizer.js') }}">
+    {{-- <script src="{{ asset('assets/js/theme-customizer/customizer.js') }}">
         document.querySelectorAll('.nav-link.menu-title').forEach(function(el) {
             el.addEventListener('touchstart', function(e) {
                 el.click();
             });
         });
-    </script>
+    </script> --}}
 
     @stack('scripts')
 </body>
