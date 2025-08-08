@@ -15,7 +15,7 @@
                 <i class="status_toggle middle" data-feather="align-center" id="sidebar-toggle"></i>
             </div>
         </div>
-        
+
         <div class="left-menu-header col">
             <ul>
                 <li>
@@ -31,7 +31,7 @@
                 </li>
             </ul>
         </div>
-        
+
         <div class="nav-right col pull-right right-menu p-0">
             <ul class="nav-menus">
                 <li>
@@ -39,7 +39,7 @@
                         <i data-feather="maximize"></i>
                     </a>
                 </li>
-                
+
                 <!-- Bookmark Dropdown -->
                 <li class="onhover-dropdown">
                     <div class="bookmark-box">
@@ -84,7 +84,7 @@
                         </ul>
                     </div>
                 </li>
-                
+
                 <!-- Notification Dropdown -->
                 <li class="onhover-dropdown">
                     <div class="notification-box">
@@ -144,21 +144,22 @@
                         </li>
                     </ul>
                 </li>
-                
+
                 <!-- Dark Mode Toggle -->
                 <li>
                     <div class="mode">
                         <i class="ti-light-bulb"></i>
                     </div>
                 </li>
-                
+
                 <!-- Chat Dropdown -->
                 <li class="onhover-dropdown">
                     <i data-feather="message-square"></i>
                     <ul class="chat-dropdown onhover-show-div">
                         <li>
                             <div class="media">
-                                <img class="img-fluid rounded-circle me-3" src="{{ asset('assets/images/user/4.jpg') }}" alt="">
+                                <img class="img-fluid rounded-circle me-3" src="{{ asset('assets/images/user/4.jpg') }}"
+                                    alt="">
                                 <div class="media-body">
                                     <span>Ain Chavez</span>
                                     <p class="f-12 light-font">Lorem Ipsum is simply dummy...</p>
@@ -168,7 +169,8 @@
                         </li>
                         <li>
                             <div class="media">
-                                <img class="img-fluid rounded-circle me-3" src="{{ asset('assets/images/user/1.jpg') }}" alt="">
+                                <img class="img-fluid rounded-circle me-3"
+                                    src="{{ asset('assets/images/user/1.jpg') }}" alt="">
                                 <div class="media-body">
                                     <span>Erica Hughes</span>
                                     <p class="f-12 light-font">Lorem Ipsum is simply dummy...</p>
@@ -178,7 +180,8 @@
                         </li>
                         <li>
                             <div class="media">
-                                <img class="img-fluid rounded-circle me-3" src="{{ asset('assets/images/user/2.jpg') }}" alt="">
+                                <img class="img-fluid rounded-circle me-3"
+                                    src="{{ asset('assets/images/user/2.jpg') }}" alt="">
                                 <div class="media-body">
                                     <span>Kori Thomas</span>
                                     <p class="f-12 light-font">Lorem Ipsum is simply dummy...</p>
@@ -191,21 +194,19 @@
                         </li>
                     </ul>
                 </li>
-                
+
                 <!-- Logout Button -->
                 <li class="onhover-dropdown p-0">
-                    <button class="btn btn-primary-light" type="button">
-                        <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                            @csrf
-                            <button type="submit" style="background: none; border: none; color: inherit;">
-                                <i data-feather="log-out"></i>Log out
-                            </button>
-                        </form>
-                    </button>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button class="btn btn-primary-light" type="submit"><i data-feather="log-out"></i>Log
+                            out</button>
+                    </form>
+
                 </li>
             </ul>
         </div>
-        
+
         <div class="d-lg-none mobile-toggle pull-right w-auto">
             <i data-feather="more-horizontal"></i>
         </div>
