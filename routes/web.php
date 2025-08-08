@@ -1,4 +1,3 @@
-use App\Http\Controllers\SiswaController;
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -24,4 +23,7 @@ Route::middleware(['auth'])->group(function () {
         return view('dashboard');
     })->name('dashboard');
     Route::resource('siswa', SiswaController::class);
+    Route::resource('kelas', App\Http\Controllers\KelasController::class);
+    Route::resource('keahlian', App\Http\Controllers\KeahlianController::class);
+    Route::resource('konsentrasi', App\Http\Controllers\KonsentrasiController::class);
 });

@@ -30,7 +30,7 @@ class SiswaController extends Controller
         Siswa::create($validated);
         return redirect()->route('siswa.index')->with('success', 'Data siswa berhasil ditambahkan!');
     }
-        public function edit($id)
+    public function edit($id)
     {
         $siswa = Siswa::findOrFail($id);
         return view('siswa.edit', compact('siswa'));
