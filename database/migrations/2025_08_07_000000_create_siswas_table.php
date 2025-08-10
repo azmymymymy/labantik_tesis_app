@@ -17,10 +17,12 @@ return new class extends Migration
             $table->id();
             $table->string('nama');
             $table->string('nis')->unique();
-            $table->string('kelas');
-            $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan']);
-            $table->string('alamat');
+            $table->string('nisn')->unique();
+            $table->unsignedBigInteger('kelas_id');
+            $table->enum('jenis_kelamin', ['L', 'P']);
             $table->timestamps();
+
+            $table->foreign('kelas_id')->references('id')->on('kelas');
         });
     }
 
