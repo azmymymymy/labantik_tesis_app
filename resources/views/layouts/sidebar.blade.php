@@ -103,7 +103,7 @@
                         </a>
                         <ul class="nav-submenu menu-content">
                             <li>
-                                <a href="#">Angket Minat</a>
+                                <a href="{{route('angket-minat.index')}}">Angket Minat</a>
                             </li>
                             <li>
                                 <a href="#">Angket Motivasi</a>
