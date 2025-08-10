@@ -34,55 +34,72 @@
                             </div>
                             <div>
                                 <span class="badge badge-primary">{{ date('d M Y') }}</span>
-                                <a href="{{ route('siswa.create') }}" class="btn btn-success btn-sm ms-2">Tambah Siswa</a>
                             </div>
                         </div>
-                        <!-- Tabel Data Siswa -->
-                        <div class="table-responsive mt-4">
-                            <table class="table table-bordered table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Nama</th>
-                                        <th>NIS</th>
-                                        <th>Kelas</th>
-                                        <th>Jenis Kelamin</th>
-                                        <th>Alamat</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($siswas as $siswa)
+                        @if ($siswas->count() > 0)
+                            <!-- Tabel Data Siswa -->
+                            <div class="table-responsive mt-4">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
                                         <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $siswa->nama }}</td>
-                                            <td>{{ $siswa->nis }}</td>
-                                            <td>{{ $siswa->kelas }}</td>
-                                            <td>{{ $siswa->jenis_kelamin }}</td>
-                                            <td>{{ $siswa->alamat }}</td>
-                                            <td>
-                                                <a href="{{ route('siswa.edit', $siswa->id) }}"
-                                                    class="btn btn-warning btn-sm">Edit</a>
-                                                <form action="{{ route('siswa.destroy', $siswa->id) }}" method="POST"
-                                                    style="display:inline-block;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm"
-                                                        onclick="return confirm('Yakin ingin menghapus data ini?')">Hapus</button>
-                                                </form>
-                                            </td>
+                                            <th>No</th>
+                                            <th>Nama</th>
+                                            <th>NIS</th>
+                                            <th>Kelas</th>
+                                            <th>Jenis Kelamin</th>
+                                            <th>Action</th>
                                         </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="6" class="text-center">Belum ada data siswa.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                        <!-- End Tabel Data Siswa -->
+                                    </thead>
+                                    <tbody>
+                                        @forelse ($siswas as $siswa)
+                                            <tr>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $siswa->nama }}</td>
+                                                <td>{{ $siswa->nis }}</td>
+                                                <td>{{ $siswa->kelas->name }}</td>
+                                                <td>{{ $siswa->jenis_kelamin }}</td>
+                                                <td>
+                                                    <a href="{{ route('siswa.edit', $siswa->id) }}"
+                                                        class="btn btn-warning btn-sm">Edit</a>
+                                                    <form action="{{ route('siswa.destroy', $siswa->id) }}" method="POST"
+                                                        style="display:inline-block;">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-sm"
+                                                            onclick="return confirm('Yakin ingin menghapus data ini?')">Hapus</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="6" class="text-center">Belum ada data siswa.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- End Tabel Data Siswa -->
+                        @endif
+
                     </div>
                 </div>
+                @if ($siswas->count() === 0)
+                    <div class="card">
+                        <div class="card-body">
+                            <form action="{{ route('siswa.store') }}" method="post" enctype="multipart/form-data">
+                                @csrf
+                                <div>
+                                    <input type="file" class="form-control" name="data_siswa" accept=".xlsx, .xls, .csv">
+                                    @error('data_siswa')
+                                        <small class="text-danger mt-2">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                                <button type="submit" class="btn btn-primary mt-3">Import Data Siswa</button>
+                            </form>
+                        </div>
+                    </div>
+                @endif
+
             </div>
         </div>
         <!-- Breadcrumb End -->
