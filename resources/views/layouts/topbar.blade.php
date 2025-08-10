@@ -23,7 +23,6 @@
             <ul class="nav-menus">
                 <li><a class="text-dark" href="#" onclick="javascript:toggleFullScreen()"><i
                             data-feather="maximize"></i></a></li>
-                <!-- ...menu items... -->
             </ul>
         </div>
         <div class="d-lg-none mobile-toggle pull-right w-auto"><i data-feather="more-horizontal"></i></div>
