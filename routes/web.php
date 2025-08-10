@@ -1,5 +1,8 @@
+
+
 <?php
 
+use App\Http\Controllers\DataPenelitian\AngketMinatController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -26,4 +29,6 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('kelas', App\Http\Controllers\KelasController::class);
     Route::resource('keahlian', App\Http\Controllers\KeahlianController::class);
     Route::resource('konsentrasi', App\Http\Controllers\KonsentrasiController::class);
+    Route::resource('angket-minat', AngketMinatController::class);
+
 });
