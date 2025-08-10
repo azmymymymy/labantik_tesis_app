@@ -72,11 +72,6 @@
                         </a>
                         <ul class="nav-submenu menu-content">
                             <li>
-                                <a href="{{ route('kelas.index') }}"
-                                    class="{{ request()->routeIs('kelas.*') ? 'text-success fw-bold' : '' }}">Data
-                                    Kelas</a>
-                            </li>
-                            <li>
                                 <a href="{{ route('keahlian.index') }}"
                                     class="{{ request()->routeIs('keahlian.*') ? 'text-success fw-bold' : '' }}">Data
                                     Keahlian</a>
@@ -86,8 +81,41 @@
                                     class="{{ request()->routeIs('konsentrasi.*') ? 'text-success fw-bold' : '' }}">Konsentrasi</a>
                             </li>
                             <li>
+                                <a href="{{ route('kelas.index') }}"
+                                    class="{{ request()->routeIs('kelas.*') ? 'text-success fw-bold' : '' }}">Data
+                                    Kelas</a>
+                            </li>
+                            <li>
                                 <a href="{{ route('siswa.index') }}"
                                     class="{{ request()->routeIs('siswa.*') ? 'text-success fw-bold' : '' }}">Siswa</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Data Penelitian Menu with Submenu -->
+                    <li class="dropdown">
+                        <a class="nav-link menu-title link-nav d-flex justify-content-between align-items-center" href="javascript:void(0)">
+                            <span>
+                                <i data-feather="book-open"></i>
+                                Data Penelitian
+                            </span>
+                            <i class="chevron-icon chevron-right" style="transition:transform .2s"></i>
+                        </a>
+                        <ul class="nav-submenu menu-content">
+                            <li>
+                                <a href="#">Angket Minat</a>
+                            </li>
+                            <li>
+                                <a href="#">Angket Motivasi</a>
+                            </li>
+                            <li>
+                                <a href="#">Hasil Belajar</a>
+                            </li>
+                            <li>
+                                <a href="#">Perhitungan AHP</a>
+                            </li>
+                        </ul>
+                    </li>
 
                                 <style>
                                     .chevron-icon {
