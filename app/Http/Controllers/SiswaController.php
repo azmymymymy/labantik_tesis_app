@@ -19,7 +19,7 @@ class SiswaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'data_siswa' => 'required|file|mimes:xlsx,xls,csv',
+            'data_siswa' => 'required|file|mimes:xlsx,xls,csv|max:2048',
         ]);
         $file = $request->file('data_siswa')->store('temp');
         Excel::import(new SiswaImport($file), $file);

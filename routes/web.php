@@ -6,6 +6,8 @@ use App\Http\Controllers\DataPenelitian\AngketMinatController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\DataPenelitian\AngketMotivasiController;
+use App\Http\Controllers\DataPenelitian\HasilBelajarController;
 use App\Http\Controllers\SiswaController;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
@@ -30,5 +32,6 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('keahlian', App\Http\Controllers\KeahlianController::class);
     Route::resource('konsentrasi', App\Http\Controllers\KonsentrasiController::class);
     Route::resource('angket-minat', AngketMinatController::class);
-
+    Route::resource('angket-motivasi', AngketMotivasiController::class);
+    Route::resource('hasil-belajar', HasilBelajarController::class);
 });

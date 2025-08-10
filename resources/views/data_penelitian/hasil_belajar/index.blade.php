@@ -25,7 +25,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h4 class="card-title mb-0">Data Siswa</h4>
+                                <h4 class="card-title mb-0">Data Hasil Belajar</h4>
                                 <nav aria-label="breadcrumb">
                                     <ol class="breadcrumb mb-0">
                                         <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
@@ -36,33 +36,43 @@
                                 <span class="badge badge-primary">{{ date('d M Y') }}</span>
                             </div>
                         </div>
-                        @if ($siswas->count() > 0)
+                        @if ($errors->any())
+                            <div class="alert alert-danger mt-3">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+
+                        @endif
+                        @if ($dataHasilBelajar->count() > 0)
                             <!-- Tabel Data Siswa -->
                             <div class="table-responsive mt-4">
                                 <table class="table table-bordered table-striped">
                                     <thead>
-                                        <tr>
+                                        <t4r>
                                             <th>No</th>
                                             <th>Nama</th>
-                                            <th>NIS</th>
                                             <th>Kelas</th>
-                                            <th>Jenis Kelamin</th>
+                                            <th>PreTest</th>
+                                            <th>PostTest</th>
                                             <th>Action</th>
-                                        </tr>
+                                        </t4r>
                                     </thead>
                                     <tbody>
-                                        @forelse ($siswas as $siswa)
+                                        @forelse ($dataHasilBelajar as $data)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $siswa->nama }}</td>
-                                                <td>{{ $siswa->nis }}</td>
-                                                <td>{{ $siswa->kelas->name }}</td>
-                                                <td>{{ $siswa->jenis_kelamin }}</td>
+                                                <td>{{ $data->siswa->nama }}</td>
+                                                <td>{{ $data->kelas->name }}</td>
+                                                <td>{{ $data->pretest }}</td>
+                                                <td>{{ $data->posttest }}</td>
                                                 <td>
-                                                    <a href="{{ route('siswa.edit', $siswa->id) }}"
+                                                    <a href="{{ route('hasil-belajar.edit', $data->id) }}"
                                                         class="btn btn-warning btn-sm">Edit</a>
-                                                    <form action="{{ route('siswa.destroy', $siswa->id) }}" method="POST"
-                                                        style="display:inline-block;">
+                                                    <form action="{{ route('hasil-belajar.destroy', $data->id) }}"
+                                                        method="POST" style="display:inline-block;">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-sm"
@@ -83,20 +93,20 @@
 
                     </div>
                 </div>
-                @if ($siswas->count() === 0)
+                @if ($dataHasilBelajar->count() === 0)
                     <div class="card">
                         <div class="card-body">
-                            <form action="{{ route('siswa.store') }}" method="post" enctype="multipart/form-data">
+                            <form action="{{ route('hasil-belajar.store') }}" method="post" enctype="multipart/form-data">
                                 @csrf
                                 <div>
-                                    <input type="file" class="form-control" name="data_siswa" accept=".xlsx, .xls, .csv">
+                                    <input type="file" class="form-control" name="data_hasilBelajar"
+                                        accept=".xlsx, .xls, .csv">
                                     <small>Format File Harus .xlsx, .xls, atau csv. Maksimal 2MB</small>
-
-                                    @error('data_siswa')
+                                    @error('data_hasilBelajar')
                                         <small class="text-danger mt-2">{{ $message }}</small>
                                     @enderror
                                 </div>
-                                <button type="submit" class="btn btn-primary mt-3">Import Data Siswa</button>
+                                <button type="submit" class="btn btn-primary mt-3">Import Data Hasil Belajar</button>
                             </form>
                         </div>
                     </div>

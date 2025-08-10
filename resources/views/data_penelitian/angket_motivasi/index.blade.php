@@ -25,7 +25,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h4 class="card-title mb-0">Data Siswa</h4>
+                                <h4 class="card-title mb-0">Data Angket Motivasi</h4>
                                 <nav aria-label="breadcrumb">
                                     <ol class="breadcrumb mb-0">
                                         <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
@@ -36,33 +36,61 @@
                                 <span class="badge badge-primary">{{ date('d M Y') }}</span>
                             </div>
                         </div>
-                        @if ($siswas->count() > 0)
+                        @if ($errors->any())
+                            <div class="alert alert-danger mt-3">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+
+                        @endif
+                        @if ($dataAngket->count() > 0)
                             <!-- Tabel Data Siswa -->
                             <div class="table-responsive mt-4">
                                 <table class="table table-bordered table-striped">
                                     <thead>
-                                        <tr>
+                                        <t4r>
                                             <th>No</th>
                                             <th>Nama</th>
-                                            <th>NIS</th>
                                             <th>Kelas</th>
-                                            <th>Jenis Kelamin</th>
+                                            <th>1</th>
+                                            <th>2</th>
+                                            <th>3</th>
+                                            <th>4</th>
+                                            <th>5</th>
+                                            <th>6</th>
+                                            <th>7</th>
+                                            <th>8</th>
+                                            <th>9</th>
+                                            <th>10</th>
+                                            <th>Total</th>
                                             <th>Action</th>
-                                        </tr>
+                                        </t4r>
                                     </thead>
                                     <tbody>
-                                        @forelse ($siswas as $siswa)
+                                        @forelse ($dataAngket as $data)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $siswa->nama }}</td>
-                                                <td>{{ $siswa->nis }}</td>
-                                                <td>{{ $siswa->kelas->name }}</td>
-                                                <td>{{ $siswa->jenis_kelamin }}</td>
+                                                <td>{{ $data->siswa->nama }}</td>
+                                                <td>{{ $data->kelas->name }}</td>
+                                                <td>{{ $data->pertanyaan_1 }}</td>
+                                                <td>{{ $data->pertanyaan_2 }}</td>
+                                                <td>{{ $data->pertanyaan_3 }}</td>
+                                                <td>{{ $data->pertanyaan_4 }}</td>
+                                                <td>{{ $data->pertanyaan_5 }}</td>
+                                                <td>{{ $data->pertanyaan_6 }}</td>
+                                                <td>{{ $data->pertanyaan_7 }}</td>
+                                                <td>{{ $data->pertanyaan_8 }}</td>
+                                                <td>{{ $data->pertanyaan_9 }}</td>
+                                                <td>{{ $data->pertanyaan_10 }}</td>
+                                                <td>{{ $data->total }}</td>
                                                 <td>
-                                                    <a href="{{ route('siswa.edit', $siswa->id) }}"
+                                                    <a href="{{ route('angket-motivasi.edit', $data->id) }}"
                                                         class="btn btn-warning btn-sm">Edit</a>
-                                                    <form action="{{ route('siswa.destroy', $siswa->id) }}" method="POST"
-                                                        style="display:inline-block;">
+                                                    <form action="{{ route('angket-motivasi.destroy', $data->id) }}"
+                                                        method="POST" style="display:inline-block;">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-sm"
@@ -83,20 +111,21 @@
 
                     </div>
                 </div>
-                @if ($siswas->count() === 0)
+                @if ($dataAngket->count() === 0)
                     <div class="card">
                         <div class="card-body">
-                            <form action="{{ route('siswa.store') }}" method="post" enctype="multipart/form-data">
+                            <form action="{{ route('angket-motivasi.store') }}" method="post"
+                                enctype="multipart/form-data">
                                 @csrf
                                 <div>
-                                    <input type="file" class="form-control" name="data_siswa" accept=".xlsx, .xls, .csv">
+                                    <input type="file" class="form-control" name="data_motivasi"
+                                        accept=".xlsx, .xls, .csv">
                                     <small>Format File Harus .xlsx, .xls, atau csv. Maksimal 2MB</small>
-
-                                    @error('data_siswa')
+                                    @error('data_motivasi')
                                         <small class="text-danger mt-2">{{ $message }}</small>
                                     @enderror
                                 </div>
-                                <button type="submit" class="btn btn-primary mt-3">Import Data Siswa</button>
+                                <button type="submit" class="btn btn-primary mt-3">Import Data Angket Motivasi</button>
                             </form>
                         </div>
                     </div>

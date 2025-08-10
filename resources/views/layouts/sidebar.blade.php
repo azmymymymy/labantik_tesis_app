@@ -1,8 +1,5 @@
 <header class="main-nav">
     <div class="sidebar-user text-center">
-        <a class="setting-primary" href="javascript:void(0)">
-            <i data-feather="settings"></i>
-        </a>
         <img class="img-90 rounded-circle" src="{{ asset('assets/images/dashboard/1.png') }}" alt="">
         <div class="badge-bottom">
             <span class="badge badge-primary">New</span>
@@ -94,7 +91,8 @@
 
                     <!-- Data Penelitian Menu with Submenu -->
                     <li class="dropdown">
-                        <a class="nav-link menu-title link-nav d-flex justify-content-between align-items-center" href="javascript:void(0)">
+                        <a class="nav-link menu-title link-nav d-flex justify-content-between align-items-center"
+                            href="javascript:void(0)">
                             <span>
                                 <i data-feather="book-open"></i>
                                 Data Penelitian
@@ -103,13 +101,13 @@
                         </a>
                         <ul class="nav-submenu menu-content">
                             <li>
-                                <a href="{{route('angket-minat.index')}}">Angket Minat</a>
+                                <a href="{{ route('angket-minat.index') }}">Angket Minat</a>
                             </li>
                             <li>
-                                <a href="#">Angket Motivasi</a>
+                                <a href="{{ route('angket-motivasi.index') }}">Angket Motivasi</a>
                             </li>
                             <li>
-                                <a href="#">Hasil Belajar</a>
+                                <a href="{{ route('hasil-belajar.index') }}">Hasil Belajar</a>
                             </li>
                             <li>
                                 <a href="#">Perhitungan AHP</a>
@@ -117,60 +115,60 @@
                         </ul>
                     </li>
 
-                                <style>
-                                    .chevron-icon {
-                                        display: inline-block;
-                                        width: 1em;
-                                        height: 1em;
-                                        vertical-align: middle;
-                                        transition: transform .2s;
-                                    }
+                    <style>
+                        .chevron-icon {
+                            display: inline-block;
+                            width: 1em;
+                            height: 1em;
+                            vertical-align: middle;
+                            transition: transform .2s;
+                        }
 
-                                    .chevron-right {
-                                        background: url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>') center/1em 1em no-repeat;
-                                    }
+                        .chevron-right {
+                            background: url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>') center/1em 1em no-repeat;
+                        }
 
-                                    .chevron-down {
-                                        background: url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>') center/1em 1em no-repeat;
+                        .chevron-down {
+                            background: url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>') center/1em 1em no-repeat;
+                        }
+                    </style>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            var dropdown = document.querySelector('.dropdown');
+                            var chevron = dropdown.querySelector('.chevron-icon');
+                            var submenu = dropdown.querySelector('.nav-submenu');
+                            // Initial state: if open by route, show submenu and chevron-down, else hide submenu and show chevron-right
+                            if (dropdown.classList.contains('open')) {
+                                chevron.classList.remove('chevron-right');
+                                chevron.classList.add('chevron-down');
+                                submenu.style.display = 'block';
+                            } else {
+                                chevron.classList.remove('chevron-down');
+                                chevron.classList.add('chevron-right');
+                                submenu.style.display = 'none';
+                            }
+                            dropdown.querySelector('.nav-link').addEventListener('click', function(e) {
+                                // Toggle open/close and chevron state
+                                if (e.target.closest('.nav-link')) {
+                                    e.preventDefault();
+                                    if (!dropdown.classList.contains('open')) {
+                                        dropdown.classList.add('open');
+                                        chevron.classList.remove('chevron-right');
+                                        chevron.classList.add('chevron-down');
+                                        submenu.style.display = 'block';
+                                    } else {
+                                        dropdown.classList.remove('open');
+                                        chevron.classList.remove('chevron-down');
+                                        chevron.classList.add('chevron-right');
+                                        submenu.style.display = 'none';
                                     }
-                                </style>
-                                <script>
-                                    document.addEventListener('DOMContentLoaded', function() {
-                                        var dropdown = document.querySelector('.dropdown');
-                                        var chevron = dropdown.querySelector('.chevron-icon');
-                                        var submenu = dropdown.querySelector('.nav-submenu');
-                                        // Initial state: if open by route, show submenu and chevron-down, else hide submenu and show chevron-right
-                                        if (dropdown.classList.contains('open')) {
-                                            chevron.classList.remove('chevron-right');
-                                            chevron.classList.add('chevron-down');
-                                            submenu.style.display = 'block';
-                                        } else {
-                                            chevron.classList.remove('chevron-down');
-                                            chevron.classList.add('chevron-right');
-                                            submenu.style.display = 'none';
-                                        }
-                                        dropdown.querySelector('.nav-link').addEventListener('click', function(e) {
-                                            // Toggle open/close and chevron state
-                                            if (e.target.closest('.nav-link')) {
-                                                e.preventDefault();
-                                                if (!dropdown.classList.contains('open')) {
-                                                    dropdown.classList.add('open');
-                                                    chevron.classList.remove('chevron-right');
-                                                    chevron.classList.add('chevron-down');
-                                                    submenu.style.display = 'block';
-                                                } else {
-                                                    dropdown.classList.remove('open');
-                                                    chevron.classList.remove('chevron-down');
-                                                    chevron.classList.add('chevron-right');
-                                                    submenu.style.display = 'none';
-                                                }
-                                            }
-                                        });
-                                    });
-                                </script>
-                            </li>
-                        </ul>
+                                }
+                            });
+                        });
+                    </script>
                     </li>
+                </ul>
+                </li>
                 </ul>
             </div>
 
