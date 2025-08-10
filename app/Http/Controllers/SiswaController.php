@@ -9,6 +9,11 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class SiswaController extends Controller
 {
+    public function clear()
+    {
+        Siswa::truncate();
+        return redirect()->route('siswa.index')->with('success', 'Semua data siswa berhasil dihapus!');
+    }
     public function index()
     {
         $siswas = Siswa::all();
