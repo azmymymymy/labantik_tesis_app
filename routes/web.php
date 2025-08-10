@@ -27,6 +27,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+    Route::delete('siswa/clear-all', [SiswaController::class, 'clear'])->name('siswa.clear');
     Route::resource('siswa', SiswaController::class);
     Route::resource('kelas', App\Http\Controllers\KelasController::class);
     Route::resource('keahlian', App\Http\Controllers\KeahlianController::class);

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard - Admin Panel')
+@section('title', 'Hasil Belajar')
 @section('meta-description', 'Main dashboard for admin panel with statistics and overview')
 
 @push('styles')
@@ -18,7 +18,6 @@
 
 @section('content')
     <div class="dashboard-default-sec">
-        <!-- Breadcrumb Start -->
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -28,7 +27,7 @@
                                 <h4 class="card-title mb-0">Data Hasil Belajar</h4>
                                 <nav aria-label="breadcrumb">
                                     <ol class="breadcrumb mb-0">
-                                        <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                                        <li class="breadcrumb-item active" aria-current="page">Data Penelitian</li>
                                     </ol>
                                 </nav>
                             </div>
@@ -36,29 +35,64 @@
                                 <span class="badge badge-primary">{{ date('d M Y') }}</span>
                             </div>
                         </div>
-                        @if ($errors->any())
-                            <div class="alert alert-danger mt-3">
-                                <ul>
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
 
+                        <!-- Alert Messages -->
+                        @if (session('success'))
+                            <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                                {{ session('success') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
                         @endif
+
+                        @if (session('error'))
+                            <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                                {{ session('error') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
+                        @endif
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+                            <div>
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                                    data-bs-target="#importModalHasilBelajar">
+                                    <i class="icon-cloud-up"></i> Import Excel
+                                </button>
+                                <a href="{{ route('hasil-belajar.create') }}" class="btn btn-primary">
+                                    <i class="icon-plus"></i> Tambah Data
+                                </a>
+                                @if ($dataHasilBelajar->count() > 0)
+                                    {{-- <form id="clearFormHasilBelajar" method="POST"
+                                        action="{{ route('hasil-belajar.clear') }}" style="display:inline-block;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger"
+                                            onclick="return confirm('Yakin ingin menghapus SEMUA data hasil belajar? Tindakan ini tidak dapat dibatalkan!')">
+                                            <i class="icon-trash"></i> Hapus Semua
+                                        </button>
+                                    </form> --}}
+                                @endif
+                            </div>
+                            <div>
+                                <span class="badge badge-info">Total Data: {{ $dataHasilBelajar->count() }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Tabel Data Hasil Belajar -->
                         @if ($dataHasilBelajar->count() > 0)
-                            <!-- Tabel Data Siswa -->
                             <div class="table-responsive mt-4">
-                                <table class="table table-bordered table-striped">
-                                    <thead>
-                                        <t4r>
+                                <table class="table table-bordered table-striped" id="dataTable">
+                                    <thead class="table">
+                                        <tr>
                                             <th>No</th>
                                             <th>Nama</th>
                                             <th>Kelas</th>
                                             <th>PreTest</th>
                                             <th>PostTest</th>
                                             <th>Action</th>
-                                        </t4r>
+                                        </tr>
                                     </thead>
                                     <tbody>
                                         @forelse ($dataHasilBelajar as $data)
@@ -69,53 +103,93 @@
                                                 <td>{{ $data->pretest }}</td>
                                                 <td>{{ $data->posttest }}</td>
                                                 <td>
-                                                    <a href="{{ route('hasil-belajar.edit', $data->id) }}"
-                                                        class="btn btn-warning btn-sm">Edit</a>
-                                                    <form action="{{ route('hasil-belajar.destroy', $data->id) }}"
-                                                        method="POST" style="display:inline-block;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm"
-                                                            onclick="return confirm('Yakin ingin menghapus data ini?')">Hapus</button>
-                                                    </form>
+                                                    <div class="btn-group" role="group">
+                                                        <a href="{{ route('hasil-belajar.show', $data->id) }}"
+                                                            class="btn btn-sm btn-info">
+                                                            <i class="icon-eye"></i>
+                                                        </a>
+                                                        <a href="{{ route('hasil-belajar.edit', $data->id) }}"
+                                                            class="btn btn-sm btn-warning">
+                                                            <i class="icon-pencil"></i>
+                                                        </a>
+                                                        <form action="{{ route('hasil-belajar.destroy', $data->id) }}"
+                                                            method="POST" style="display: inline;"
+                                                            onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                                <i class="icon-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="6" class="text-center">Belum ada data siswa.</td>
+                                                <td colspan="6" class="text-center">Belum ada data hasil belajar.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
                             </div>
-                            <!-- End Tabel Data Siswa -->
                         @endif
-
+                        <!-- End Tabel Data Hasil Belajar -->
                     </div>
                 </div>
-                @if ($dataHasilBelajar->count() === 0)
-                    <div class="card">
-                        <div class="card-body">
-                            <form action="{{ route('hasil-belajar.store') }}" method="post" enctype="multipart/form-data">
-                                @csrf
-                                <div>
-                                    <input type="file" class="form-control" name="data_hasilBelajar"
-                                        accept=".xlsx, .xls, .csv">
-                                    <small>Format File Harus .xlsx, .xls, atau csv. Maksimal 2MB</small>
-                                    @error('data_hasilBelajar')
-                                        <small class="text-danger mt-2">{{ $message }}</small>
-                                    @enderror
-                                </div>
-                                <button type="submit" class="btn btn-primary mt-3">Import Data Hasil Belajar</button>
-                            </form>
-                        </div>
-                    </div>
-                @endif
-
             </div>
         </div>
-        <!-- Breadcrumb End -->
     </div>
+
+    <!-- Import Modal -->
+    <div class="modal fade" id="importModalHasilBelajar" tabindex="-1" aria-labelledby="importModalHasilBelajarLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('hasil-belajar.store') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="importModalHasilBelajarLabel">Import Data Excel</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Pilih File Excel</label>
+                            <input type="file" class="form-control" id="file" name="data_hasilBelajar"
+                                accept=".xlsx,.xls,.csv" required>
+                            <div class="form-text">
+                                Format yang diizinkan: .xlsx, .xls, .csv (Maksimal 2MB)
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <strong>Format Excel:</strong><br>
+                            Kolom 1: Nama<br>
+                            Kolom 2: Kelas<br>
+                            Kolom 3: PreTest<br>
+                            Kolom 4: PostTest<br>
+                            <em>Header harus dimulai dari baris ke-2</em>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success">Import</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+    </script>
 @endsection
 
 @push('scripts')
