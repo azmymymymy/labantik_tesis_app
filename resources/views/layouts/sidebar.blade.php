@@ -113,7 +113,7 @@
                                 <a href="{{ route('hasil-belajar.index') }}">Hasil Belajar</a>
                             </li>
                             <li>
-                                <a href="#">Perhitungan AHP</a>
+                                <a href="{{ route('ahp-kelompok.index') }}">Perhitungan AHP Kelompok</a>
                             </li>
                         </ul>
                     </li>
