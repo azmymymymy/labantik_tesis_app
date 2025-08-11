@@ -100,8 +100,8 @@
                                         @forelse ($dataAngket as $data)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $data->siswa->nama }}</td>
-                                                <td>{{ $data->kelas->name }}</td>
+                                                <td>{{ optional($data->siswa)->nama ?? '-' }}</td>
+                                                <td>{{ optional($data->kelas)->name ?? '-' }}</td>
                                                 <td>{{ $data->pertanyaan_1 }}</td>
                                                 <td>{{ $data->pertanyaan_2 }}</td>
                                                 <td>{{ $data->pertanyaan_3 }}</td>

@@ -56,8 +56,7 @@ class AngketMinatController extends Controller
 
         // Handle manual form submission
         $request->validate([
-            'siswa_id' => 'required|exists:siswas,id',
-            'kelas_id' => 'required|exists:kelas,id',
+            
             'pertanyaan_1' => 'required|numeric|min:1|max:5',
             'pertanyaan_2' => 'required|numeric|min:1|max:5',
             'pertanyaan_3' => 'required|numeric|min:1|max:5',
@@ -82,8 +81,7 @@ class AngketMinatController extends Controller
             $request->pertanyaan_13 + $request->pertanyaan_14;
 
         AngketMinat::create([
-            'siswa_id' => $request->siswa_id,
-            'kelas_id' => $request->kelas_id,
+            
             'pertanyaan_1' => $request->pertanyaan_1,
             'pertanyaan_2' => $request->pertanyaan_2,
             'pertanyaan_3' => $request->pertanyaan_3,

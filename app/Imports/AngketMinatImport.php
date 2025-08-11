@@ -3,89 +3,80 @@
 namespace App\Imports;
 
 use App\Models\AngketMinat;
-use App\Models\Kelas;
 use App\Models\Siswa;
-use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class AngketMinatImport implements ToModel, WithHeadingRow
 {
     use Importable;
 
-    private $headerRow = 1;
-
-    public function __construct($filePath)
-    {
-        $spreedsheet = IOFactory::load(Storage::path($filePath));
-        $sheet = $spreedsheet->getActiveSheet();
-
-        foreach ($sheet->toArray() as $i => $row) {
-            if (strtolower($row[0]) === 'nama') { // Kolom pertama = 'Nama'
-                $this->headerRow = $i + 1; // +1 karena array index mulai 0
-                break;
-            }
-        }
-    }
-
     public function headingRow(): int
     {
-        return $this->headerRow;
+        return 1; // sesuaikan kalau header di baris lain
     }
 
-    /**
-     * Transform each row to model
-     */
     public function model(array $row)
     {
-        // Skip empty rows
-        if (empty($row['nama']) || empty($row['kelas'])) {
-            return null;
+        // Normalisasi key header: trim, lowercase, spasi->underscore, titik/dash->underscore
+        $normalized = [];
+        foreach ($row as $k => $v) {
+            $key = strtolower(trim((string) $k));
+            $key = preg_replace('/[\s\.\-]+/', '_', $key);
+            $normalized[$key] = $v;
         }
 
-        $namaId = Siswa::where('nama', $row['nama'])->value('id');
-        $kelasId = Kelas::where('name', $row['kelas'])->value('id');
-
-        // Cek duplikasi berdasarkan siswa_id dan kelas_id
-        $exists = AngketMinat::where('siswa_id', $namaId)
-            ->where('kelas_id', $kelasId)
-            ->exists();
-        if ($exists) {
-            return null; // skip baris duplikat
+        // Cari nomor urut di Excel (biasanya header "NO" -> normalized "no")
+        $no = $normalized['no'] ?? $normalized['no_'] ?? $normalized['nomor'] ?? null;
+        $siswa = null;
+        if ($no !== null && $no !== '') {
+            $siswa = Siswa::find((int) $no);
         }
 
-        // Helper: valid angka 1-5
-        $fix = function ($v) {
-            $v = (int) $v;
-            return ($v >= 1 && $v <= 5) ? $v : 1;
-        };
+        // Ambil id dan kelas dari DB kalau ada
+        $siswaId = $siswa ? $siswa->id : null;
+        $kelasId = $siswa ? $siswa->kelas_id : null;
 
-        // Calculate total nilai
-        $totalNilai = 0;
+        // Ambil nilai pertanyaan 1..14 — cek beberapa kemungkinan key (angka, atau 'pertanyaan_1' dst.)
+        $dataNilai = [];
+        $totalCalc = 0;
         for ($i = 1; $i <= 14; $i++) {
-            $totalNilai += $fix($row[$i] ?? 1);
+            $candidates = [
+                (string)$i,
+                "pertanyaan_{$i}",
+                "pertanyaan_{$i}", // same but kept for clarity
+                "pertanyaan_{$i}", // fallback duplicates harmless
+                "p{$i}",
+                "p_{$i}"
+            ];
+
+            $val = null;
+            foreach ($candidates as $c) {
+                if (array_key_exists($c, $normalized) && $normalized[$c] !== null && $normalized[$c] !== '') {
+                    $val = (int) $normalized[$c];
+                    break;
+                }
+            }
+
+            // default 0 kalau kosong (hindari NOT NULL error)
+            $val = is_numeric($val) ? (int)$val : 0;
+            $dataNilai["pertanyaan_{$i}"] = $val;
+            $totalCalc += $val;
         }
 
-        return new AngketMinat([
-            'siswa_id' => $namaId,
+        // total: pakai kolom 'total' kalau ada, kalau nggak gunakan perhitungan
+        $total = null;
+        if (array_key_exists('total', $normalized) && $normalized['total'] !== null && $normalized['total'] !== '') {
+            $total = (int) $normalized['total'];
+        } else {
+            $total = $totalCalc;
+        }
+
+        return new AngketMinat(array_merge([
+            'siswa_id' => $siswaId,
             'kelas_id' => $kelasId,
-            'pertanyaan_1' => $fix($row['1'] ?? 1),
-            'pertanyaan_2' => $fix($row['2'] ?? 1),
-            'pertanyaan_3' => $fix($row['3'] ?? 1),
-            'pertanyaan_4' => $fix($row['4'] ?? 1),
-            'pertanyaan_5' => $fix($row['5'] ?? 1),
-            'pertanyaan_6' => $fix($row['6'] ?? 1),
-            'pertanyaan_7' => $fix($row['7'] ?? 1),
-            'pertanyaan_8' => $fix($row['8'] ?? 1),
-            'pertanyaan_9' => $fix($row['9'] ?? 1),
-            'pertanyaan_10' => $fix($row['10'] ?? 1),
-            'pertanyaan_11' => $fix($row['11'] ?? 1),
-            'pertanyaan_12' => $fix($row['12'] ?? 1),
-            'pertanyaan_13' => $fix($row['13'] ?? 1),
-            'pertanyaan_14' => $fix($row['14'] ?? 1),
-            'total' => $totalNilai,
-        ]);
+            'total'    => $total,
+        ], $dataNilai));
     }
 }
