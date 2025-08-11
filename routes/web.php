@@ -53,6 +53,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('observasi', ObservasiController::class);
 
     Route::resource('ahp-kelompok', AhpKelompokController::class);
+    Route::resource('ahp', AhpIndividuController::class);
     Route::get('/ahp/search-siswa', [AhpIndividuController::class, 'searchSiswa']);
     Route::get('/ahp/calculate/{siswa_id}', [AhpIndividuController::class, 'calculateAHP']);
     Route::get('/ahp/bulk-analysis', [AhpIndividuController::class, 'bulkAnalysis']);
