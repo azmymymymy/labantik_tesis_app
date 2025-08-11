@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DataPenelitian\AhpIndividuController;
+use App\Http\Controllers\DataPenelitian\AhpKelompokController;
 use App\Http\Controllers\DataPenelitian\AngketMotivasiController;
 use App\Http\Controllers\DataPenelitian\HasilBelajarController;
 use App\Http\Controllers\DataPenelitian\ObservasiController;
@@ -14,18 +15,19 @@ use App\Http\Controllers\SiswaController;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 Route::get('/', function () {
-    return view('auth.login');
-});
+    return redirect()->route('login');
+})->middleware('guest');;
 
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login')->middleware('guest');
+Route::post('/login', [LoginController::class, 'login'])->middleware('guest');
 
-Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [RegisterController::class, 'register']);
+Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register')->middleware('guest');
+Route::post('/register', [RegisterController::class, 'register'])->middleware('guest');
 
 
 Route::middleware(['auth'])->group(function () {
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
@@ -49,10 +51,11 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('angket-motivasi', AngketMotivasiController::class);
     Route::resource('hasil-belajar', HasilBelajarController::class);
     Route::resource('observasi', ObservasiController::class);
-    Route::resource('ahp', AhpIndividuController::class);
+
+    Route::resource('ahp-kelompok', AhpKelompokController::class);
     Route::get('/ahp/search-siswa', [AhpIndividuController::class, 'searchSiswa']);
     Route::get('/ahp/calculate/{siswa_id}', [AhpIndividuController::class, 'calculateAHP']);
     Route::get('/ahp/bulk-analysis', [AhpIndividuController::class, 'bulkAnalysis']);
     // Route untuk mendapatkan daftar semua siswa
-Route::get('/ahp/siswa-list', [AhpIndividuController::class, 'getSiswaList']);
+    Route::get('/ahp/siswa-list', [AhpIndividuController::class, 'getSiswaList']);
 });
