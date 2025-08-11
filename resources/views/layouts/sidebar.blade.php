@@ -107,6 +107,9 @@
                                 <a href="{{ route('angket-motivasi.index') }}">Angket Motivasi</a>
                             </li>
                             <li>
+                                <a href="{{ route('observasi.index') }}">Observasi</a>
+                            </li>
+                            <li>
                                 <a href="{{ route('hasil-belajar.index') }}">Hasil Belajar</a>
                             </li>
                             <li>
