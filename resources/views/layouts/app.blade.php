@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/icofont.css') }}">
     <!-- Themify icon-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/themify-icons.css') }}">
-        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/themify.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/themify.css') }}">
 
     <!-- Flag icon-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/flag-icon.css') }}">
@@ -130,6 +130,16 @@
     <script src="{{ asset('assets/js/datepicker/date-picker/datepicker.custom.js') }}"></script>
     <!-- Theme js-->
     <script src="{{ asset('assets/js/script.js') }}"></script>
+    <script>
+        document.getElementById("jenisSelect").addEventListener("change", function() {
+            const kelasSelect = document.getElementById("kelasSelect");
+            if (this.value === "kelompok") {
+                kelasSelect.style.display = "block"; // tampilkan
+            } else {
+                kelasSelect.style.display = "none"; // sembunyikan
+            }
+        });
+    </script>
     {{-- <script src="{{ asset('assets/js/theme-customizer/customizer.js') }}">
         document.querySelectorAll('.nav-link.menu-title').forEach(function(el) {
             el.addEventListener('touchstart', function(e) {

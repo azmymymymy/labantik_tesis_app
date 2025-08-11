@@ -49,4 +49,5 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('angket-motivasi', AngketMotivasiController::class);
     Route::resource('hasil-belajar', HasilBelajarController::class);
     Route::resource('observasi', ObservasiController::class);
+    Route::resource('ahp', AhpController::class);
 });
