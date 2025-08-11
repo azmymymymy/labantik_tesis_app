@@ -12,42 +12,52 @@ class AngketMinat extends Model
     protected $table = 'angket_minat';
 
     protected $fillable = [
-        'nama',
-        'kelas',
-        'nilai_1',
-        'nilai_2',
-        'nilai_3',
-        'nilai_4',
-        'nilai_5',
-        'nilai_6',
-        'nilai_7',
-        'nilai_8',
-        'nilai_9',
-        'nilai_10',
-        'nilai_11',
-        'nilai_12',
-        'nilai_13',
-        'nilai_14',
-        'total_nilai',
+        'siswa_id',
+        'kelas_id',
+        'pertanyaan_1',
+        'pertanyaan_2',
+        'pertanyaan_3',
+        'pertanyaan_4',
+        'pertanyaan_5',
+        'pertanyaan_6',
+        'pertanyaan_7',
+        'pertanyaan_8',
+        'pertanyaan_9',
+        'pertanyaan_10',
+        'pertanyaan_11',
+        'pertanyaan_12',
+        'pertanyaan_13',
+        'pertanyaan_14',
+        'total',
     ];
 
     protected $casts = [
-        'nilai_1' => 'integer',
-        'nilai_2' => 'integer',
-        'nilai_3' => 'integer',
-        'nilai_4' => 'integer',
-        'nilai_5' => 'integer',
-        'nilai_6' => 'integer',
-        'nilai_7' => 'integer',
-        'nilai_8' => 'integer',
-        'nilai_9' => 'integer',
-        'nilai_10' => 'integer',
-        'nilai_11' => 'integer',
-        'nilai_12' => 'integer',
-        'nilai_13' => 'integer',
-        'nilai_14' => 'integer',
-        'total_nilai' => 'integer',
+        'pertanyaan_1' => 'integer',
+        'pertanyaan_2' => 'integer',
+        'pertanyaan_3' => 'integer',
+        'pertanyaan_4' => 'integer',
+        'pertanyaan_5' => 'integer',
+        'pertanyaan_6' => 'integer',
+        'pertanyaan_7' => 'integer',
+        'pertanyaan_8' => 'integer',
+        'pertanyaan_9' => 'integer',
+        'pertanyaan_10' => 'integer',
+        'pertanyaan_11' => 'integer',
+        'pertanyaan_12' => 'integer',
+        'pertanyaan_13' => 'integer',
+        'pertanyaan_14' => 'integer',
+        'total' => 'integer',
     ];
+
+    public function siswa()
+    {
+        return $this->belongsTo(Siswa::class, 'siswa_id');
+    }
+
+    public function kelas()
+    {
+        return $this->belongsTo(Kelas::class, 'kelas_id');
+    }
 
     /**
      * Get all nilai attributes as array
@@ -55,20 +65,20 @@ class AngketMinat extends Model
     public function getNilaiAttribute()
     {
         return [
-            $this->nilai_1,
-            $this->nilai_2,
-            $this->nilai_3,
-            $this->nilai_4,
-            $this->nilai_5,
-            $this->nilai_6,
-            $this->nilai_7,
-            $this->nilai_8,
-            $this->nilai_9,
-            $this->nilai_10,
-            $this->nilai_11,
-            $this->nilai_12,
-            $this->nilai_13,
-            $this->nilai_14,
+            $this->pertanyaan_1,
+            $this->pertanyaan_2,
+            $this->pertanyaan_3,
+            $this->pertanyaan_4,
+            $this->pertanyaan_5,
+            $this->pertanyaan_6,
+            $this->pertanyaan_7,
+            $this->pertanyaan_8,
+            $this->pertanyaan_9,
+            $this->pertanyaan_10,
+            $this->pertanyaan_11,
+            $this->pertanyaan_12,
+            $this->pertanyaan_13,
+            $this->pertanyaan_14,
         ];
     }
 
@@ -77,12 +87,12 @@ class AngketMinat extends Model
      */
     public function calculateTotalNilai()
     {
-        $total = $this->nilai_1 + $this->nilai_2 + $this->nilai_3 + $this->nilai_4 + 
-                $this->nilai_5 + $this->nilai_6 + $this->nilai_7 + $this->nilai_8 + 
-                $this->nilai_9 + $this->nilai_10 + $this->nilai_11 + $this->nilai_12 + 
-                $this->nilai_13 + $this->nilai_14;
+        $total = $this->pertanyaan_1 + $this->pertanyaan_2 + $this->pertanyaan_3 + $this->pertanyaan_4 + 
+                $this->pertanyaan_5 + $this->pertanyaan_6 + $this->pertanyaan_7 + $this->pertanyaan_8 + 
+                $this->pertanyaan_9 + $this->pertanyaan_10 + $this->pertanyaan_11 + $this->pertanyaan_12 + 
+                $this->pertanyaan_13 + $this->pertanyaan_14;
         
-        $this->total_nilai = $total;
+        $this->total = $total;
         return $total;
     }
 
@@ -91,7 +101,7 @@ class AngketMinat extends Model
      */
     public function getRataRataNilai()
     {
-        return round($this->total_nilai / 14, 2);
+        return round($this->total / 14, 2);
     }
 
     /**
@@ -99,7 +109,7 @@ class AngketMinat extends Model
      */
     public function getKategoriMinat()
     {
-        $total = $this->total_nilai;
+        $total = $this->total;
         
         if ($total >= 56) {
             return 'Sangat Tinggi';
@@ -119,7 +129,7 @@ class AngketMinat extends Model
      */
     public function scopeByKelas($query, $kelas)
     {
-        return $query->where('kelas', $kelas);
+        return $query->where('kelas_id', $kelas);
     }
 
     /**
@@ -127,7 +137,7 @@ class AngketMinat extends Model
      */
     public function scopeByTotalNilai($query, $min, $max)
     {
-        return $query->whereBetween('total_nilai', [$min, $max]);
+        return $query->whereBetween('total', [$min, $max]);
     }
 
     /**
@@ -135,6 +145,6 @@ class AngketMinat extends Model
      */
     public static function getDaftarKelas()
     {
-        return self::distinct('kelas')->pluck('kelas')->sort()->values();
+        return self::with('kelas')->get()->pluck('kelas.name')->unique()->sort()->values();
     }
 }
