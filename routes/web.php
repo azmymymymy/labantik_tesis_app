@@ -6,7 +6,7 @@ use App\Http\Controllers\DataPenelitian\AngketMinatController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\DataPenelitian\AhpController;
+use App\Http\Controllers\DataPenelitian\AhpIndividuController;
 use App\Http\Controllers\DataPenelitian\AhpKelompokController;
 use App\Http\Controllers\DataPenelitian\AngketMotivasiController;
 use App\Http\Controllers\DataPenelitian\HasilBelajarController;
@@ -53,4 +53,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('observasi', ObservasiController::class);
 
     Route::resource('ahp-kelompok', AhpKelompokController::class);
+    Route::get('/ahp/search-siswa', [AhpIndividuController::class, 'searchSiswa']);
+    Route::get('/ahp/calculate/{siswa_id}', [AhpIndividuController::class, 'calculateAHP']);
+    Route::get('/ahp/bulk-analysis', [AhpIndividuController::class, 'bulkAnalysis']);
+    // Route untuk mendapatkan daftar semua siswa
+    Route::get('/ahp/siswa-list', [AhpIndividuController::class, 'getSiswaList']);
 });

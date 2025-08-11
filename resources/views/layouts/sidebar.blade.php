@@ -115,6 +115,9 @@
                             <li>
                                 <a href="{{ route('ahp-kelompok.index') }}">Perhitungan AHP Kelompok</a>
                             </li>
+                            <li>
+                                <a href="{{route('ahp.index')}}">Perhitungan AHP Individu</a>
+                            </li>
                         </ul>
                     </li>
 
