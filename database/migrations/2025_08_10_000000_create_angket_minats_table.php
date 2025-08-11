@@ -13,29 +13,29 @@ return new class extends Migration
     {
         Schema::create('angket_minat', function (Blueprint $table) {
             $table->id();
-            $table->string('nama');
-            $table->string('kelas');
-            $table->tinyInteger('nilai_1')->default(1);
-            $table->tinyInteger('nilai_2')->default(1);
-            $table->tinyInteger('nilai_3')->default(1);
-            $table->tinyInteger('nilai_4')->default(1);
-            $table->tinyInteger('nilai_5')->default(1);
-            $table->tinyInteger('nilai_6')->default(1);
-            $table->tinyInteger('nilai_7')->default(1);
-            $table->tinyInteger('nilai_8')->default(1);
-            $table->tinyInteger('nilai_9')->default(1);
-            $table->tinyInteger('nilai_10')->default(1);
-            $table->tinyInteger('nilai_11')->default(1);
-            $table->tinyInteger('nilai_12')->default(1);
-            $table->tinyInteger('nilai_13')->default(1);
-            $table->tinyInteger('nilai_14')->default(1);
-            $table->tinyInteger('total_nilai')->default(14);
+            $table->string('siswa_id');
+            $table->string('kelas_id');
+            $table->tinyInteger('pertanyaan_1')->default(1);
+            $table->tinyInteger('pertanyaan_2')->default(1);
+            $table->tinyInteger('pertanyaan_3')->default(1);
+            $table->tinyInteger('pertanyaan_4')->default(1);
+            $table->tinyInteger('pertanyaan_5')->default(1);
+            $table->tinyInteger('pertanyaan_6')->default(1);
+            $table->tinyInteger('pertanyaan_7')->default(1);
+            $table->tinyInteger('pertanyaan_8')->default(1);
+            $table->tinyInteger('pertanyaan_9')->default(1);
+            $table->tinyInteger('pertanyaan_10')->default(1);
+            $table->tinyInteger('pertanyaan_11')->default(1);
+            $table->tinyInteger('pertanyaan_12')->default(1);
+            $table->tinyInteger('pertanyaan_13')->default(1);
+            $table->tinyInteger('pertanyaan_14')->default(1);
+            $table->tinyInteger('total')->default(14);
             $table->timestamps();
             
             // Indexes for better performance
-            $table->index('nama');
-            $table->index('kelas');
-            $table->index('total_nilai');
+            $table->index('siswa_id');
+            $table->index('kelas_id');
+            $table->index('total');
         });
     }
 
