@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('angket_minat', function (Blueprint $table) {
             $table->id();
-            $table->string('siswa_id');
-            $table->string('kelas_id');
+            $table->integer('siswa_id');
+            $table->integer('kelas_id');
             $table->tinyInteger('pertanyaan_1')->default(1);
             $table->tinyInteger('pertanyaan_2')->default(1);
             $table->tinyInteger('pertanyaan_3')->default(1);
@@ -31,7 +31,7 @@ return new class extends Migration
             $table->tinyInteger('pertanyaan_14')->default(1);
             $table->tinyInteger('total')->default(14);
             $table->timestamps();
-            
+
             // Indexes for better performance
             $table->index('siswa_id');
             $table->index('kelas_id');
