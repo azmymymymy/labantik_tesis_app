@@ -3,18 +3,20 @@
 namespace App\Http\Controllers\DataPenelitian;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\AngketMinatImport;
 use App\Models\AngketMinat;
-
+use App\Models\Kelas;
+use App\Models\Siswa;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AngketMinatController extends Controller
 {
     public function index()
     {
-        $angketMinat = AngketMinat::all();
-        return view('data_penelitian.angket_minat.index', compact('angketMinat'));
+        $dataAngket = AngketMinat::with(['siswa', 'kelas'])->get();
+        return view('data_penelitian.angket_minat.index', compact('dataAngket'));
     }
 
     /**
@@ -22,7 +24,9 @@ class AngketMinatController extends Controller
      */
     public function create()
     {
-        return view('data_penelitian.angket_minat.create');
+        $siswas = Siswa::all();
+        $kelas = Kelas::all();
+        return view('data_penelitian.angket_minat.create', compact('siswas', 'kelas'));
     }
 
     /**
@@ -30,50 +34,71 @@ class AngketMinatController extends Controller
      */
     public function store(Request $request)
     {
+        // Handle file import
+        if ($request->hasFile('data_minat')) {
+            $request->validate([
+                'data_minat' => 'required|mimes:xlsx,xls,csv|max:2048'
+            ]);
+
+            try {
+                $file = $request->file('data_minat');
+                $filePath = $file->store('temp');
+                
+                Excel::import(new AngketMinatImport($filePath), $file);
+                
+                Storage::delete($filePath);
+
+                return redirect()->route('angket-minat.index')->with('success', 'Data berhasil diimport dari file Excel!');
+            } catch (\Exception $e) {
+                return redirect()->route('angket-minat.index')->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage());
+            }
+        }
+
+        // Handle manual form submission
         $request->validate([
-            'nama' => 'required|string|max:255',
-            'kelas' => 'required|string|max:255',
-            'nilai_1' => 'required|numeric|min:1|max:5',
-            'nilai_2' => 'required|numeric|min:1|max:5',
-            'nilai_3' => 'required|numeric|min:1|max:5',
-            'nilai_4' => 'required|numeric|min:1|max:5',
-            'nilai_5' => 'required|numeric|min:1|max:5',
-            'nilai_6' => 'required|numeric|min:1|max:5',
-            'nilai_7' => 'required|numeric|min:1|max:5',
-            'nilai_8' => 'required|numeric|min:1|max:5',
-            'nilai_9' => 'required|numeric|min:1|max:5',
-            'nilai_10' => 'required|numeric|min:1|max:5',
-            'nilai_11' => 'required|numeric|min:1|max:5',
-            'nilai_12' => 'required|numeric|min:1|max:5',
-            'nilai_13' => 'required|numeric|min:1|max:5',
-            'nilai_14' => 'required|numeric|min:1|max:5',
+            'siswa_id' => 'required|exists:siswas,id',
+            'kelas_id' => 'required|exists:kelas,id',
+            'pertanyaan_1' => 'required|numeric|min:1|max:5',
+            'pertanyaan_2' => 'required|numeric|min:1|max:5',
+            'pertanyaan_3' => 'required|numeric|min:1|max:5',
+            'pertanyaan_4' => 'required|numeric|min:1|max:5',
+            'pertanyaan_5' => 'required|numeric|min:1|max:5',
+            'pertanyaan_6' => 'required|numeric|min:1|max:5',
+            'pertanyaan_7' => 'required|numeric|min:1|max:5',
+            'pertanyaan_8' => 'required|numeric|min:1|max:5',
+            'pertanyaan_9' => 'required|numeric|min:1|max:5',
+            'pertanyaan_10' => 'required|numeric|min:1|max:5',
+            'pertanyaan_11' => 'required|numeric|min:1|max:5',
+            'pertanyaan_12' => 'required|numeric|min:1|max:5',
+            'pertanyaan_13' => 'required|numeric|min:1|max:5',
+            'pertanyaan_14' => 'required|numeric|min:1|max:5',
         ]);
 
         // Hitung total nilai
-        $totalNilai = $request->nilai_1 + $request->nilai_2 + $request->nilai_3 +
-            $request->nilai_4 + $request->nilai_5 + $request->nilai_6 +
-            $request->nilai_7 + $request->nilai_8 + $request->nilai_9 +
-            $request->nilai_10 + $request->nilai_11 + $request->nilai_12 +
-            $request->nilai_13 + $request->nilai_14;
+        $totalNilai = $request->pertanyaan_1 + $request->pertanyaan_2 + $request->pertanyaan_3 +
+            $request->pertanyaan_4 + $request->pertanyaan_5 + $request->pertanyaan_6 +
+            $request->pertanyaan_7 + $request->pertanyaan_8 + $request->pertanyaan_9 +
+            $request->pertanyaan_10 + $request->pertanyaan_11 + $request->pertanyaan_12 +
+            $request->pertanyaan_13 + $request->pertanyaan_14;
 
         AngketMinat::create([
-            'nama' => $request->nama,
-            'kelas' => $request->kelas,
-            'nilai_1' => $request->nilai_1,
-            'nilai_2' => $request->nilai_2,
-            'nilai_3' => $request->nilai_3,
-            'nilai_4' => $request->nilai_4,
-            'nilai_5' => $request->nilai_5,
-            'nilai_6' => $request->nilai_6,
-            'nilai_7' => $request->nilai_7,
-            'nilai_8' => $request->nilai_8,
-            'nilai_9' => $request->nilai_9,
-            'nilai_10' => $request->nilai_10,
-            'nilai_11' => $request->nilai_11,
-            'nilai_12' => $request->nilai_12,
-            'nilai_13' => $request->nilai_13,
-            'nilai_14' => $request->nilai_14,
-            'total_nilai' => $totalNilai,
+            'siswa_id' => $request->siswa_id,
+            'kelas_id' => $request->kelas_id,
+            'pertanyaan_1' => $request->pertanyaan_1,
+            'pertanyaan_2' => $request->pertanyaan_2,
+            'pertanyaan_3' => $request->pertanyaan_3,
+            'pertanyaan_4' => $request->pertanyaan_4,
+            'pertanyaan_5' => $request->pertanyaan_5,
+            'pertanyaan_6' => $request->pertanyaan_6,
+            'pertanyaan_7' => $request->pertanyaan_7,
+            'pertanyaan_8' => $request->pertanyaan_8,
+            'pertanyaan_9' => $request->pertanyaan_9,
+            'pertanyaan_10' => $request->pertanyaan_10,
+            'pertanyaan_11' => $request->pertanyaan_11,
+            'pertanyaan_12' => $request->pertanyaan_12,
+            'pertanyaan_13' => $request->pertanyaan_13,
+            'pertanyaan_14' => $request->pertanyaan_14,
+            'total' => $totalNilai,
         ]);
 
         return redirect()->route('angket-minat.index')->with('success', 'Data angket minat berhasil ditambahkan!');
@@ -84,8 +109,8 @@ class AngketMinatController extends Controller
      */
     public function show(string $id)
     {
-        $angketMinat = AngketMinat::findOrFail($id);
-        return view('angket-minat.show', compact('angketMinat'));
+        $angketMinat = AngketMinat::with(['siswa', 'kelas'])->findOrFail($id);
+        return view('data_penelitian.angket_minat.show', compact('angketMinat'));
     }
 
     /**
@@ -94,7 +119,9 @@ class AngketMinatController extends Controller
     public function edit(string $id)
     {
         $angketMinat = AngketMinat::findOrFail($id);
-        return view('data_penelitian.angket_minat.edit', compact('angketMinat'));
+        $siswas = Siswa::all();
+        $kelas = Kelas::all();
+        return view('data_penelitian.angket_minat.edit', compact('angketMinat', 'siswas', 'kelas'));
     }
 
     /**
@@ -103,49 +130,51 @@ class AngketMinatController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            
-            'nilai_1' => 'required|numeric|min:1|max:5',
-            'nilai_2' => 'required|numeric|min:1|max:5',
-            'nilai_3' => 'required|numeric|min:1|max:5',
-            'nilai_4' => 'required|numeric|min:1|max:5',
-            'nilai_5' => 'required|numeric|min:1|max:5',
-            'nilai_6' => 'required|numeric|min:1|max:5',
-            'nilai_7' => 'required|numeric|min:1|max:5',
-            'nilai_8' => 'required|numeric|min:1|max:5',
-            'nilai_9' => 'required|numeric|min:1|max:5',
-            'nilai_10' => 'required|numeric|min:1|max:5',
-            'nilai_11' => 'required|numeric|min:1|max:5',
-            'nilai_12' => 'required|numeric|min:1|max:5',
-            'nilai_13' => 'required|numeric|min:1|max:5',
-            'nilai_14' => 'required|numeric|min:1|max:5',
+            'siswa_id' => 'required|exists:siswas,id',
+            'kelas_id' => 'required|exists:kelas,id',
+            'pertanyaan_1' => 'required|numeric|min:1|max:5',
+            'pertanyaan_2' => 'required|numeric|min:1|max:5',
+            'pertanyaan_3' => 'required|numeric|min:1|max:5',
+            'pertanyaan_4' => 'required|numeric|min:1|max:5',
+            'pertanyaan_5' => 'required|numeric|min:1|max:5',
+            'pertanyaan_6' => 'required|numeric|min:1|max:5',
+            'pertanyaan_7' => 'required|numeric|min:1|max:5',
+            'pertanyaan_8' => 'required|numeric|min:1|max:5',
+            'pertanyaan_9' => 'required|numeric|min:1|max:5',
+            'pertanyaan_10' => 'required|numeric|min:1|max:5',
+            'pertanyaan_11' => 'required|numeric|min:1|max:5',
+            'pertanyaan_12' => 'required|numeric|min:1|max:5',
+            'pertanyaan_13' => 'required|numeric|min:1|max:5',
+            'pertanyaan_14' => 'required|numeric|min:1|max:5',
         ]);
 
         $angketMinat = AngketMinat::findOrFail($id);
 
         // Hitung total nilai
-        $totalNilai = $request->nilai_1 + $request->nilai_2 + $request->nilai_3 +
-            $request->nilai_4 + $request->nilai_5 + $request->nilai_6 +
-            $request->nilai_7 + $request->nilai_8 + $request->nilai_9 +
-            $request->nilai_10 + $request->nilai_11 + $request->nilai_12 +
-            $request->nilai_13 + $request->nilai_14;
+        $totalNilai = $request->pertanyaan_1 + $request->pertanyaan_2 + $request->pertanyaan_3 +
+            $request->pertanyaan_4 + $request->pertanyaan_5 + $request->pertanyaan_6 +
+            $request->pertanyaan_7 + $request->pertanyaan_8 + $request->pertanyaan_9 +
+            $request->pertanyaan_10 + $request->pertanyaan_11 + $request->pertanyaan_12 +
+            $request->pertanyaan_13 + $request->pertanyaan_14;
 
         $angketMinat->update([
-            
-            'nilai_1' => $request->nilai_1,
-            'nilai_2' => $request->nilai_2,
-            'nilai_3' => $request->nilai_3,
-            'nilai_4' => $request->nilai_4,
-            'nilai_5' => $request->nilai_5,
-            'nilai_6' => $request->nilai_6,
-            'nilai_7' => $request->nilai_7,
-            'nilai_8' => $request->nilai_8,
-            'nilai_9' => $request->nilai_9,
-            'nilai_10' => $request->nilai_10,
-            'nilai_11' => $request->nilai_11,
-            'nilai_12' => $request->nilai_12,
-            'nilai_13' => $request->nilai_13,
-            'nilai_14' => $request->nilai_14,
-            'total_nilai' => $totalNilai,
+            'siswa_id' => $request->siswa_id,
+            'kelas_id' => $request->kelas_id,
+            'pertanyaan_1' => $request->pertanyaan_1,
+            'pertanyaan_2' => $request->pertanyaan_2,
+            'pertanyaan_3' => $request->pertanyaan_3,
+            'pertanyaan_4' => $request->pertanyaan_4,
+            'pertanyaan_5' => $request->pertanyaan_5,
+            'pertanyaan_6' => $request->pertanyaan_6,
+            'pertanyaan_7' => $request->pertanyaan_7,
+            'pertanyaan_8' => $request->pertanyaan_8,
+            'pertanyaan_9' => $request->pertanyaan_9,
+            'pertanyaan_10' => $request->pertanyaan_10,
+            'pertanyaan_11' => $request->pertanyaan_11,
+            'pertanyaan_12' => $request->pertanyaan_12,
+            'pertanyaan_13' => $request->pertanyaan_13,
+            'pertanyaan_14' => $request->pertanyaan_14,
+            'total' => $totalNilai,
         ]);
 
         return redirect()->route('angket-minat.index')->with('success', 'Data angket minat berhasil diperbarui!');
@@ -161,37 +190,6 @@ class AngketMinatController extends Controller
 
         return redirect()->route('angket-minat.index')->with('success', 'Data angket minat berhasil dihapus!');
     }
-
-    /**
-     * Import data from Excel file.
-     */
-    public function import(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv|max:2048'
-        ]);
-
-        try {
-            Excel::import(new AngketMinatImport, $request->file('file'));
-
-            return redirect()->route('angket-minat.index')->with('success', 'Data berhasil diimport dari file Excel!');
-        } catch (\Exception $e) {
-            return redirect()->route('angket-minat.index')->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Show import form.
-     */
-    public function importForm()
-    {
-        return view('angket-minat.import');
-    }
-
-    /**
-     * Export data to Excel.
-     */
-
 
     /**
      * Hapus semua data angket minat
