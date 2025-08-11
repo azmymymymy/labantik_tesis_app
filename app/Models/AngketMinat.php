@@ -31,23 +31,7 @@ class AngketMinat extends Model
         'total',
     ];
 
-    protected $casts = [
-        'pertanyaan_1' => 'integer',
-        'pertanyaan_2' => 'integer',
-        'pertanyaan_3' => 'integer',
-        'pertanyaan_4' => 'integer',
-        'pertanyaan_5' => 'integer',
-        'pertanyaan_6' => 'integer',
-        'pertanyaan_7' => 'integer',
-        'pertanyaan_8' => 'integer',
-        'pertanyaan_9' => 'integer',
-        'pertanyaan_10' => 'integer',
-        'pertanyaan_11' => 'integer',
-        'pertanyaan_12' => 'integer',
-        'pertanyaan_13' => 'integer',
-        'pertanyaan_14' => 'integer',
-        'total' => 'integer',
-    ];
+    
 
     public function siswa()
     {
