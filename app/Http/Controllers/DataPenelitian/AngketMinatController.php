@@ -19,6 +19,11 @@ class AngketMinatController extends Controller
         return view('data_penelitian.angket_minat.index', compact('dataAngket'));
     }
 
+    public function daftar()
+    {
+        return view('data_penelitian.angket_minat.daftar');
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -43,9 +48,9 @@ class AngketMinatController extends Controller
             try {
                 $file = $request->file('data_minat');
                 $filePath = $file->store('temp');
-                
+
                 Excel::import(new AngketMinatImport($filePath), $file);
-                
+
                 Storage::delete($filePath);
 
                 return redirect()->route('angket-minat.index')->with('success', 'Data berhasil diimport dari file Excel!');
@@ -56,7 +61,7 @@ class AngketMinatController extends Controller
 
         // Handle manual form submission
         $request->validate([
-            
+
             'pertanyaan_1' => 'required|numeric|min:1|max:5',
             'pertanyaan_2' => 'required|numeric|min:1|max:5',
             'pertanyaan_3' => 'required|numeric|min:1|max:5',
@@ -81,7 +86,7 @@ class AngketMinatController extends Controller
             $request->pertanyaan_13 + $request->pertanyaan_14;
 
         AngketMinat::create([
-            
+
             'pertanyaan_1' => $request->pertanyaan_1,
             'pertanyaan_2' => $request->pertanyaan_2,
             'pertanyaan_3' => $request->pertanyaan_3,

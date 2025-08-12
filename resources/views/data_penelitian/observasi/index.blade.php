@@ -61,7 +61,9 @@
                                     <i class="icon-cloud-up"></i> Import Excel
                                 </button>
                                 <a href="{{ route('hasil-belajar.create') }}" class="btn btn-primary">
-                                    <i class="icon-plus"></i> Tambah Data
+                                    <i class="icon-plus"></i> Tambah Data</a>
+                                <a href="{{ route('observasi.daftar') }}" class="btn btn-primary">
+                                    <i class="icon-plus"></i>  Daftar Pertanyaan
                                 </a>
                                 @if ($observasi->count() > 0)
                                     {{-- <form id="clearFormHasilBelajar" method="POST"
