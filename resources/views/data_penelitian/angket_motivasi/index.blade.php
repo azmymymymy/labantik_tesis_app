@@ -63,6 +63,9 @@
                                 <a href="{{ route('angket-motivasi.create') }}" class="btn btn-primary">
                                     <i class="icon-plus"></i> Tambah Data
                                 </a>
+                                <a href="{{ route('angket-motivasi.daftar') }}" class="btn btn-primary">
+                                    <i class="icon-plus"></i> Daftar Pertanyaan
+                                </a>
                                 @if ($dataAngket->count() > 0)
                                     {{-- <form id="clearFormMotivasi" method="POST"
                                         action="{{ route('angket-motivasi.clear') }}" style="display:inline-block;">
@@ -115,10 +118,7 @@
                                                 <td>{{ $data->total }}</td>
                                                 <td>
                                                     <div class="btn-group" role="group">
-                                                        <a href="{{ route('angket-motivasi.show', $data->id) }}"
-                                                            class="btn btn-sm btn-info">
-                                                            <i class="icon-eye"></i>
-                                                        </a>
+                                                        
                                                         <a href="{{ route('angket-motivasi.edit', $data->id) }}"
                                                             class="btn btn-sm btn-warning">
                                                             <i class="icon-pencil"></i>

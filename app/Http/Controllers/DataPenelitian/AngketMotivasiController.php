@@ -16,6 +16,13 @@ class AngketMotivasiController extends Controller
         return view('data_penelitian.angket_motivasi.index', compact('dataAngket'));
     }
 
+    public function daftar()
+    {
+        // This method is intentionally left empty as per the context provided.
+        // It can be used to show details of a specific Angket Motivasi if needed in the future.
+        return view('data_penelitian.angket_motivasi.daftar');
+    }
+
     public function store(Request $request)
     {
         $request->validate([

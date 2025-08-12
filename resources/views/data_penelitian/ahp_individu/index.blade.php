@@ -11,7 +11,7 @@
             transform: translateY(-5px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
         }
-        
+
         .autocomplete-items {
             position: absolute;
             border: 1px solid #d4d4d4;
@@ -33,30 +33,30 @@
         .autocomplete-items div:hover {
             background-color: #e9e9e9;
         }
-        
+
         .siswa-row {
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
-        
+
         .siswa-row:hover {
             background-color: #f8f9fa;
         }
-        
+
         .analyze-btn {
             transition: all 0.3s ease;
         }
-        
+
         .analyze-btn:hover {
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        
+
         .analyze-btn.loading {
             opacity: 0.6;
             pointer-events: none;
         }
-        
+
         .loading-spinner {
             display: inline-block;
             width: 20px;
@@ -66,7 +66,7 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -89,22 +89,22 @@
                                     </ol>
                                 </nav>
                             </div>
-                            
+
                             <div>
                                 <span class="badge badge-primary">{{ date('d M Y') }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 {{-- <!-- Search Box -->
                 <div class="card mt-3">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="autocomplete" style="width: 100%;">
-                                <input type="text" 
-                                       id="siswaSearch" 
-                                       class="form-control" 
+                                <input type="text"
+                                       id="siswaSearch"
+                                       class="form-control"
                                        placeholder="Cari siswa (minimal 2 karakter)..."
                                        autocomplete="off">
                                 <div id="autocompleteResults" class="autocomplete-items"></div>
@@ -112,7 +112,7 @@
                         </div>
                     </div>
                 </div> --}}
-                
+
                 <!-- Daftar Siswa -->
                 <div class="card mt-3">
                     <div class="card-header bg-light">
@@ -139,7 +139,7 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
                                                      style="width: 32px; height: 32px; font-size: 12px;">
                                                     {{ strtoupper(substr($data->nama, 0, 1)) }}
                                                 </div>
@@ -154,8 +154,8 @@
                                             <span class="badge bg-secondary">{{ $data->kelas->name ?? 'Kelas tidak tersedia' }}</span>
                                         </td>
                                         <td>
-                                            <button class="btn btn-sm btn-primary analyze-btn" 
-                                                    data-siswa-id="{{ $data->id }}" 
+                                            <button class="btn btn-sm btn-primary analyze-btn"
+                                                    data-siswa-id="{{ $data->id }}"
                                                     data-siswa-nama="{{ $data->nama }}">
                                                 <i class="bi bi-calculator"></i> Analisis AHP
                                             </button>
@@ -182,7 +182,7 @@
                         @endif
                     </div>
                 </div>
-                
+
                 <!-- Results Container -->
                 <div id="individuResults" class="d-none mt-3">
                     <!-- Hasil akan ditampilkan di sini -->
@@ -223,21 +223,21 @@
                 });
             });
         });
-        
+
         // Event handler untuk tombol analisis AHP
         $('.analyze-btn').on('click', function(e) {
             e.stopPropagation();
             const siswaId = $(this).data('siswa-id');
             const siswaNama = $(this).data('siswa-nama');
-            
+
             // Reset search box
             $('#siswaSearch').val(siswaNama);
             $('#autocompleteResults').empty();
-            
+
             // Load data AHP
             loadSiswaData(siswaId, siswaNama, $(this));
         });
-        
+
         // Event handler untuk klik row (optional)
         $('.siswa-row').on('click', function(e) {
             if (!$(e.target).closest('.analyze-btn').length) {
@@ -253,7 +253,7 @@
                 buttonElement.html('<span class="loading-spinner"></span> Menghitung...');
                 $('.analyze-btn').not(buttonElement).prop('disabled', true);
             }
-            
+
             // Show loading di results area
             $('#individuResults').removeClass('d-none').html(`
                 <div class="card">
@@ -265,17 +265,17 @@
                     </div>
                 </div>
             `);
-            
+
             // Scroll ke hasil
             $('html, body').animate({
                 scrollTop: $('#individuResults').offset().top - 100
             }, 500);
-            
+
             // Tambahkan timeout untuk request yang lama
             const xhr = $.get(`/ahp/calculate/${siswaId}`)
                 .done(function(response) {
                     console.log('Response received:', response); // Debug log
-                    
+
                     if (response.success) {
                         renderAHPResult(response.data);
                     } else {
@@ -284,9 +284,9 @@
                 })
                 .fail(function(xhr, status, error) {
                     console.error('Request failed:', xhr, status, error); // Debug log
-                    
+
                     let errorMessage = 'Terjadi kesalahan saat memuat data';
-                    
+
                     if (xhr.status === 404) {
                         errorMessage = 'Endpoint tidak ditemukan. Periksa routing aplikasi.';
                     } else if (xhr.status === 500) {
@@ -301,7 +301,7 @@
                             errorMessage = `Error ${xhr.status}: ${error}`;
                         }
                     }
-                    
+
                     showAHPError(errorMessage);
                 })
                 .always(function() {
@@ -312,7 +312,7 @@
                         $('.analyze-btn').prop('disabled', false);
                     }
                 });
-                
+
             // Set timeout 30 detik
             setTimeout(function() {
                 if (xhr.readyState !== 4) {
@@ -326,7 +326,7 @@
                 }
             }, 30000);
         }
-        
+
         // Function untuk menampilkan error AHP
         function showAHPError(message) {
             $('#individuResults').html(`
@@ -363,19 +363,19 @@
         function renderAHPResult(data) {
             const { siswa, raw_scores, ahp_result } = data;
             const { comparison_matrix, normalized_matrix, weights, consistency_ratio, dominance } = ahp_result;
-            
+
             let html = `
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <h4 class="card-title mb-0">Hasil Analisis AHP - ${siswa.nama}</h4>
                     <span class="badge bg-light text-dark">${siswa.kelas}</span>
                 </div>
-                
+
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="card mb-4">
-                                <div class="card-header bg-light">
+                                <div class="card-header">
                                     <h5 class="mb-0">Data Mentah</h5>
                                 </div>
                                 <div class="card-body">
@@ -395,9 +395,9 @@
                                     </ul>
                                 </div>
                             </div>
-                            
+
                             <div class="card">
-                                <div class="card-header bg-light">
+                                <div class="card-header">
                                     <h5 class="mb-0">Bobot Kriteria</h5>
                                 </div>
                                 <div class="card-body">
@@ -406,50 +406,50 @@
                                         <span><strong>${weights.percentages[0].toFixed(2)}%</strong></span>
                                     </div>
                                     <div class="progress mb-3">
-                                        <div class="progress-bar bg-success" role="progressbar" 
-                                            style="width: ${weights.percentages[0].toFixed(0)}%" 
-                                            aria-valuenow="${weights.percentages[0].toFixed(0)}" 
-                                            aria-valuemin="0" 
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                            style="width: ${weights.percentages[0].toFixed(0)}%"
+                                            aria-valuenow="${weights.percentages[0].toFixed(0)}"
+                                            aria-valuemin="0"
                                             aria-valuemax="100"></div>
                                     </div>
-                                    
+
                                     <div class="d-flex justify-content-between mb-2">
                                         <span>Motivasi</span>
                                         <span><strong>${weights.percentages[1].toFixed(2)}%</strong></span>
                                     </div>
                                     <div class="progress mb-3">
-                                        <div class="progress-bar bg-info" role="progressbar" 
-                                            style="width: ${weights.percentages[1].toFixed(0)}%" 
-                                            aria-valuenow="${weights.percentages[1].toFixed(0)}" 
-                                            aria-valuemin="0" 
+                                        <div class="progress-bar bg-info" role="progressbar"
+                                            style="width: ${weights.percentages[1].toFixed(0)}%"
+                                            aria-valuenow="${weights.percentages[1].toFixed(0)}"
+                                            aria-valuemin="0"
                                             aria-valuemax="100"></div>
                                     </div>
-                                    
+
                                     <div class="d-flex justify-content-between mb-2">
                                         <span>Observasi</span>
                                         <span><strong>${weights.percentages[2].toFixed(2)}%</strong></span>
                                     </div>
                                     <div class="progress mb-3">
-                                        <div class="progress-bar bg-warning" role="progressbar" 
-                                            style="width: ${weights.percentages[2].toFixed(0)}%" 
-                                            aria-valuenow="${weights.percentages[2].toFixed(0)}" 
-                                            aria-valuemin="0" 
+                                        <div class="progress-bar bg-warning" role="progressbar"
+                                            style="width: ${weights.percentages[2].toFixed(0)}%"
+                                            aria-valuenow="${weights.percentages[2].toFixed(0)}"
+                                            aria-valuemin="0"
                                             aria-valuemax="100"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <div class="card">
-                                <div class="card-header bg-light">
+                                <div class="card-header">
                                     <h5 class="mb-0">Kesimpulan Analisis</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="alert alert-primary">
                                         <i class="bi bi-lightbulb"></i> ${dominance.interpretation}
                                     </div>
-                                    
+
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <div>
                                             <span class="d-block">Kriteria Dominan:</span>
@@ -457,7 +457,7 @@
                                         </div>
                                         <div class="display-4 text-primary">${dominance.dominant_percentage.toFixed(2)}%</div>
                                     </div>
-                                    
+
                                     <div class="mt-4">
                                         <h6>Ranking Kriteria:</h6>
                                         <ol class="list-group list-group-numbered">
@@ -485,11 +485,11 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row mt-4">
                         <div class="col-md-6">
                             <div class="card">
-                                <div class="card-header bg-light">
+                                <div class="card-header">
                                     <h5 class="mb-0">Matriks Perbandingan</h5>
                                 </div>
                                 <div class="card-body">
@@ -528,10 +528,10 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <div class="card">
-                                <div class="card-header bg-light">
+                                <div class="card-header">
                                     <h5 class="mb-0">Matriks Normalisasi</h5>
                                 </div>
                                 <div class="card-body">
@@ -571,15 +571,15 @@
                             </div>
                         </div>
                     </div>
-                    
-                    
+
+
                 </div>
             </div>
             `;
-            
+
             $('#individuResults').removeClass('d-none').html(html);
         }
-        
+
         // Clear search when clicking outside
         $(document).on('click', function(e) {
             if (!$(e.target).closest('.autocomplete').length) {
