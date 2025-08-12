@@ -5,23 +5,9 @@
             <span class="badge badge-primary">New</span>
         </div>
         <a href="">
-            <h6 class="mt-3 f-14 f-w-600">{{ Auth::user()->name ?? 'Emay Walter' }}</h6>
+            <h6 class="mt-3 f-14 f-w-600">{{ Auth::user()->username ?? 'Emay Walter' }}</h6>
         </a>
-        <p class="mb-0 font-roboto">{{ Auth::user()->department ?? 'Human Resources Department' }}</p>
-        <ul>
-            <li>
-                <span><span class="counter">19.8</span>k</span>
-                <p>Follow</p>
-            </li>
-            <li>
-                <span>2 year</span>
-                <p>Experience</p>
-            </li>
-            <li>
-                <span><span class="counter">95.2</span>k</span>
-                <p>Follower</p>
-            </li>
-        </ul>
+        <p class="mb-0 font-roboto">{{ Auth::user()->namalengkap ?? 'Human Resources Department' }}</p>
     </div>
 
     <nav>
@@ -116,7 +102,7 @@
                                 <a href="{{ route('ahp-kelompok.index') }}">Perhitungan AHP Kelompok</a>
                             </li>
                             <li>
-                                <a href="{{route('ahp.index')}}">Perhitungan AHP Individu</a>
+                                <a href="{{ route('ahp.index') }}">Perhitungan AHP Individu</a>
                             </li>
                         </ul>
                     </li>

@@ -64,7 +64,7 @@
                                     <i class="icon-plus"></i> Tambah Data
                                 </a>
                                 @if ($siswas->count() > 0)
-                                     {{-- <form id="clearFormSiswa" method="POST" action="{{ route('siswa.clear') }}"
+                                    {{-- <form id="clearFormSiswa" method="POST" action="{{ route('siswa.clear') }}"
                                         style="display:inline-block;">
                                         @csrf
                                         @method('DELETE')
@@ -89,6 +89,7 @@
                                             <th>No</th>
                                             <th>Nama</th>
                                             <th>NIS</th>
+                                            <th>NISN</th>
                                             <th>Kelas</th>
                                             <th>Jenis Kelamin</th>
                                             <th>Action</th>
@@ -100,6 +101,7 @@
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $siswa->nama }}</td>
                                                 <td>{{ $siswa->nis }}</td>
+                                                <td>{{ $siswa->nisn }}</td>
                                                 <td>{{ $siswa->kelas->name }}</td>
                                                 <td>{{ $siswa->jenis_kelamin }}</td>
                                                 <td>

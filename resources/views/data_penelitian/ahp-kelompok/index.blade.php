@@ -23,36 +23,13 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <!-- Kolom kiri -->
                             <div>
-                                <h4 class="card-title mb-1">AHP</h4>
+                                <h4 class="card-title mb-1">Perhitungan AHP Kelompok</h4>
                                 <nav aria-label="breadcrumb">
                                     <ol class="breadcrumb mb-0">
                                         <li class="breadcrumb-item active" aria-current="page">Data Penelitian</li>
                                     </ol>
                                 </nav>
                             </div>
-
-                            <!-- Select pertama -->
-                            <div class="d-flex align-items-center">
-                                <form method="GET" action="" class="d-flex align-items-center">
-                                    <!-- Hidden input untuk mempertahankan kelas_id jika ada -->
-                                    @if (request('kelas_id'))
-                                        <input type="hidden" name="kelas_id" value="{{ request('kelas_id') }}">
-                                    @endif
-
-                                    <select name="kelas_id" class="custom-select form-control mb-2" style="width:auto;"
-                                        onchange="this.form.submit()">
-                                        <option value="">-- Pilih Kelas --</option>
-                                        @foreach ($kelas as $k)
-                                            <option value="{{ $k->id }}"
-                                                {{ request('kelas_id') == $k->id ? 'selected' : '' }}>
-                                                {{ $k->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </form>
-
-                            </div>
-
                             <!-- Kolom kanan -->
                             <div>
                                 <span class="badge badge-primary">{{ date('d M Y') }}</span>
@@ -60,29 +37,71 @@
                         </div>
                     </div>
                 </div>
-                @if (request()->has('kelas_id') && isset($ahpData))
+                @if (isset($ahpData))
                     <!-- Card 1: Data Awal & Matriks Perbandingan -->
                     <div class="card">
                         <div class="card-body">
                             <h4 class="card-title">Langkah AHP - Data Awal & Matriks Perbandingan</h4>
                             <div class="mb-3">
-                                <p>Kelas: <span class="badge bg-info">{{ $ahpData['kelas']['nama'] }}</span></p>
-                                <p>Data Rata-rata Kelas:</p>
-                                <ul style="list-style: none; padding: 0;">
-                                    <li style="margin-bottom: 5px;">
-                                        <span style="display:inline-block; width:80px;">C1</span> = Minat:
-                                        {{ $ahpData['rata_rata_nilai']['minat'] }}
+                                <p><strong>Data Rata-rata Kelompok:</strong></p>
+                                <ul
+                                    style="list-style: none; padding: 0; background-color: #f8f9fa; padding: 15px; border-radius: 5px;">
+                                    <li style="margin-bottom: 8px;">
+                                        <span style="display:inline-block; width:100px; font-weight: bold;">Minat</span>
+                                        = {{ number_format($ahpData['data_mentah']['minat_raw'] ?? 0, 2) }}
+                                        <small class="text-muted">(dari {{ $ahpData['total_data']['minat'] ?? 0 }}
+                                            data)</small>
                                     </li>
-                                    <li style="margin-bottom: 5px;">
-                                        <span style="display:inline-block; width:80px;">C2</span> = Motivasi:
-                                        {{ $ahpData['rata_rata_nilai']['motivasi'] }}
+                                    <li style="margin-bottom: 8px;">
+                                        <span style="display:inline-block; width:100px; font-weight: bold;">Motivasi</span>
+                                        = {{ number_format($ahpData['data_mentah']['motivasi_raw'] ?? 0, 2) }}
+                                        <small class="text-muted">(dari {{ $ahpData['total_data']['motivasi'] ?? 0 }}
+                                            data)</small>
                                     </li>
-                                    <li style="margin-bottom: 5px;">
-                                        <span style="display:inline-block; width:80px;">C3</span> = Observasi:
-                                        {{ $ahpData['rata_rata_nilai']['observasi'] }}
+                                    <li style="margin-bottom: 8px;">
+                                        <span style="display:inline-block; width:100px; font-weight: bold;">Observasi</span>
+                                        = {{ number_format($ahpData['data_mentah']['observasi_raw'] ?? 0, 2) }}
+                                        <small class="text-muted">(dari {{ $ahpData['total_data']['observasi'] ?? 0 }}
+                                            data)</small>
                                     </li>
                                 </ul>
                             </div>
+
+                            <!-- Kolom Kanan: Normalisasi -->
+                            <div class="col-md-6">
+                                <p><strong>Hasil Normalisasi ke Persentase:</strong></p>
+                                <ul
+                                    style="list-style: none; padding: 0; background-color: #e8f5e8; padding: 15px; border-radius: 5px;">
+                                    <li style="margin-bottom: 8px;">
+                                        <span style="display:inline-block; width:80px; font-weight: bold;">C1</span> =
+                                        Minat:
+                                        <strong>{{ $ahpData['rata_rata_nilai']['minat'] }}%</strong>
+                                        <br><small
+                                            class="text-muted">{{ number_format($ahpData['data_mentah']['minat_raw'] ?? 0, 2) }}
+                                            ÷ 70 × 100</small>
+                                    </li>
+                                    <li style="margin-bottom: 8px;">
+                                        <span style="display:inline-block; width:80px; font-weight: bold;">C2</span> =
+                                        Motivasi:
+                                        <strong>{{ $ahpData['rata_rata_nilai']['motivasi'] }}%</strong>
+                                        <br><small
+                                            class="text-muted">{{ number_format($ahpData['data_mentah']['motivasi_raw'] ?? 0, 2) }}
+                                            ÷ 40 × 100</small>
+                                    </li>
+                                    <li style="margin-bottom: 8px;">
+                                        <span style="display:inline-block; width:80px; font-weight: bold;">C3</span> =
+                                        Observasi:
+                                        <strong>{{ $ahpData['rata_rata_nilai']['observasi'] }}%</strong>
+                                        <br><small
+                                            class="text-muted">{{ number_format($ahpData['data_mentah']['observasi_raw'] ?? 0, 2) }}
+                                            ÷ 35 × 100</small>
+                                    </li>
+                                </ul>
+                            </div>
+
+
+
+
 
                             <!-- Matriks Perbandingan Formula -->
                             <div class="table-responsive mt-5">
@@ -412,7 +431,7 @@
 
                         </div>
                     </div>
-                @elseif (request()->has('kelas_id') && !isset($ahpData))
+                @elseif (!isset($ahpData))
                     <div class="alert alert-warning">
                         <i class="bi bi-exclamation-triangle"></i>
                         Data AHP belum tersedia. Pastikan data minat, motivasi, dan observasi sudah lengkap untuk kelas ini.
