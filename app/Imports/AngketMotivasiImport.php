@@ -41,11 +41,12 @@ class AngketMotivasiImport implements ToModel, WithHeadingRow
     }
     public function model(array $row)
     {
-        $namaId = Siswa::where('nama', $row['nama'])->value('id');
-        $kelasId = Kelas::where('name', $row['kelas'])->value('id');
+        $kelas = Kelas::firstOrCreate(['name', $row['kelas']], []);
+        $siswa = Siswa::firstOrCreate(['nama', $row['nama']], ['kelas_id', $kelas->id]);
+
         return new Angket_motivasi([
-            'siswa_id'      => $namaId,
-            'kelas_id'      => $kelasId,
+            'siswa_id'      => $siswa->id,
+            'kelas_id'      => $kelas->id,
             'pertanyaan_1'  => $row['1'],
             'pertanyaan_2'  => $row['2'],
             'pertanyaan_3'  => $row['3'],

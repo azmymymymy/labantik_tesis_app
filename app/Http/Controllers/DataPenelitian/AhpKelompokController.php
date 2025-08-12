@@ -13,108 +13,101 @@ use Illuminate\Support\Facades\DB;
 
 class AhpKelompokController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $kelas = Kelas::all();
+        // Ambil rata-rata keseluruhan dari database tanpa filter kelas
+        $avgMinatRaw = AngketMinat::avg('total');
+        $avgMotivasiRaw = Angket_motivasi::avg('total');
+        $avgObservasiRaw = Observasi::avg('total');
+
+        // Konversi ke persentase berdasarkan skala masing-masing
+        $avgMinat = $avgMinatRaw ? number_format(($avgMinatRaw / 70) * 100, 1) : 0;
+        $avgMotivasi = $avgMotivasiRaw ? number_format(($avgMotivasiRaw / 40) * 100, 1) : 0;
+        $avgObservasi = $avgObservasiRaw ? number_format(($avgObservasiRaw / 35) * 100, 1) : 0;
+
         $ahpData = null;
 
-        // Jika ada kelas_id di request, hitung AHP
-        if ($request->has('kelas_id')) {
-            $kelas_id = $request->get('kelas_id');
+        if ($avgMinat && $avgMotivasi && $avgObservasi) {
+            // Hitung AHP dari nilai persentase keseluruhan
+            $ahpResult = $this->calculateAHPProcess($avgMinat, $avgMotivasi, $avgObservasi);
 
-            try {
-                // Ambil data kelas
-                $kelasData = Kelas::findOrFail($kelas_id);
-
-                // Hitung rata-rata nilai per kelas
-                $avgMinat = AngketMinat::whereHas('siswa', function ($query) use ($kelas_id) {
-                    $query->where('kelas_id', $kelas_id);
-                })->avg('total');
-
-                $avgMotivasi = Angket_motivasi::whereHas('siswa', function ($query) use ($kelas_id) {
-                    $query->where('kelas_id', $kelas_id);
-                })->avg('total');
-
-                $avgObservasi = Observasi::where('kelas_id', $kelas_id)->avg('total');
-
-                // Cek apakah data lengkap
-                if ($avgMinat && $avgMotivasi && $avgObservasi) {
-                    // Hitung AHP
-                    $ahpResult = $this->calculateAHP($avgMinat, $avgMotivasi, $avgObservasi);
-
-                    // Siapkan data untuk view
-                    $ahpData = [
-                        'success' => true,
-                        'kelas' => [
-                            'id' => $kelasData->id,
-                            'nama' => $kelasData->name
-                        ],
-                        'rata_rata_nilai' => [
-                            'minat' => round($avgMinat, 2),
-                            'motivasi' => round($avgMotivasi, 2),
-                            'observasi' => round($avgObservasi, 2)
-                        ],
-                        'ahp' => $ahpResult
-                    ];
-                }
-            } catch (\Exception $e) {
-                // Handle error jika diperlukan
-                $ahpData = [
-                    'error' => 'Terjadi kesalahan: ' . $e->getMessage()
-                ];
-            }
+            $ahpData = [
+                'success' => true,
+                'data_mentah' => [
+                    'minat_raw' => round($avgMinatRaw, 2),
+                    'motivasi_raw' => round($avgMotivasiRaw, 2),
+                    'observasi_raw' => round($avgObservasiRaw, 2)
+                ],
+                'rata_rata_nilai' => [
+                    'minat' => $avgMinat,
+                    'motivasi' => $avgMotivasi,
+                    'observasi' => $avgObservasi
+                ],
+                'total_data' => [
+                    'minat' => AngketMinat::count(),
+                    'motivasi' => Angket_motivasi::count(),
+                    'observasi' => Observasi::count()
+                ],
+                'ahp' => $ahpResult
+            ];
+        } else {
+            $ahpData = [
+                'error' => 'Data belum lengkap atau kosong'
+            ];
         }
 
-        return view('data_penelitian.ahp-kelompok.index', compact('kelas', 'ahpData'));
+        return view('data_penelitian.ahp-kelompok.index', compact('ahpData'));
     }
 
-    public function getClassAHP($kelas_id)
+    /**
+     * Hitung AHP dari semua data tanpa pengelompokan kelas
+     */
+    public function calculateAHP()
     {
         try {
-            // Ambil data kelas
-            $kelas = Kelas::findOrFail($kelas_id);
+            // Ambil rata-rata langsung dari semua data di database
+            $avgMinatRaw = AngketMinat::avg('total');
+            $avgMotivasiRaw = Angket_motivasi::avg('total');
+            $avgObservasiRaw = Observasi::avg('total');
 
-            // Hitung rata-rata nilai per kelas (bukan per siswa)
-            // Rata-rata minat dari siswa di kelas ini
-            $avgMinat = AngketMinat::whereHas('siswa', function ($query) use ($kelas_id) {
-                $query->where('kelas_id', $kelas_id);
-            })->avg('total');
-
-            // Rata-rata motivasi dari siswa di kelas ini
-            $avgMotivasi = Angket_motivasi::whereHas('siswa', function ($query) use ($kelas_id) {
-                $query->where('kelas_id', $kelas_id);
-            })->avg('total');
-
-            // Rata-rata observasi dari data observasi kelas
-            $avgObservasi = Observasi::where('kelas_id', $kelas_id)->avg('total');
-
-            // Validasi data lengkap
-            if (!$avgMinat || !$avgMotivasi || !$avgObservasi) {
+            // Validasi data ada
+            if (!$avgMinatRaw || !$avgMotivasiRaw || !$avgObservasiRaw) {
                 return response()->json([
-                    'error' => 'Data tidak lengkap untuk kelas ini',
+                    'error' => 'Data tidak lengkap atau kosong',
                     'missing' => [
-                        'minat' => !$avgMinat,
-                        'motivasi' => !$avgMotivasi,
-                        'observasi' => !$avgObservasi
+                        'minat' => !$avgMinatRaw,
+                        'motivasi' => !$avgMotivasiRaw,
+                        'observasi' => !$avgObservasiRaw
                     ]
                 ], 400);
             }
 
-            // Hitung AHP berdasarkan rata-rata kelas
-            $ahpResult = $this->calculateAHP($avgMinat, $avgMotivasi, $avgObservasi);
+            // Normalisasi sesuai batas max masing-masing
+            $avgMinat = ($avgMinatRaw / 70) * 100;
+            $avgMotivasi = ($avgMotivasiRaw / 40) * 100;
+            $avgObservasi = ($avgObservasiRaw / 35) * 100;
+
+            // Hitung AHP
+            $ahpResult = $this->calculateAHPProcess($avgMinat, $avgMotivasi, $avgObservasi);
 
             return response()->json([
                 'success' => true,
-                'kelas' => [
-                    'id' => $kelas->id,
-                    'nama' => $kelas->nama
+                'data_mentah' => [
+                    'minat_raw' => round($avgMinatRaw, 2),
+                    'motivasi_raw' => round($avgMotivasiRaw, 2),
+                    'observasi_raw' => round($avgObservasiRaw, 2)
                 ],
                 'rata_rata_nilai' => [
                     'minat' => round($avgMinat, 2),
                     'motivasi' => round($avgMotivasi, 2),
                     'observasi' => round($avgObservasi, 2)
                 ],
-                'ahp' => $ahpResult
+                'ahp' => $ahpResult,
+                'total_data' => [
+                    'minat' => AngketMinat::count(),
+                    'motivasi' => Angket_motivasi::count(),
+                    'observasi' => Observasi::count()
+                ]
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -124,9 +117,9 @@ class AhpKelompokController extends Controller
     }
 
     /**
-     * Hitung AHP menggunakan rata-rata nilai kelas
+     * Hitung AHP menggunakan rata-rata nilai
      */
-    private function calculateAHP($minat, $motivasi, $observasi)
+    private function calculateAHPProcess($minat, $motivasi, $observasi)
     {
         // Validasi input
         if ($minat <= 0 || $motivasi <= 0 || $observasi <= 0) {
@@ -206,10 +199,11 @@ class AhpKelompokController extends Controller
         ];
 
         // Ranking
-        arsort($percentages);
+        $sortedPercentages = $percentages;
+        arsort($sortedPercentages);
         $ranking = [];
         $rank = 1;
-        foreach ($percentages as $key => $value) {
+        foreach ($sortedPercentages as $key => $value) {
             $ranking[] = [
                 'rank' => $rank++,
                 'criteria' => $dominantLabels[$key],
@@ -275,69 +269,5 @@ class AhpKelompokController extends Controller
         $cr = $ci / $ri;
 
         return round($cr, 4);
-    }
-
-    /**
-     * Hitung AHP untuk semua kelas
-     */
-    public function calculateAll()
-    {
-        try {
-            $results = [];
-
-            // Ambil semua kelas
-            $kelasList = Kelas::all();
-
-            foreach ($kelasList as $kelas) {
-                // Hitung rata-rata nilai per kelas
-                $avgMinat = AngketMinat::whereHas('siswa', function ($query) use ($kelas) {
-                    $query->where('kelas_id', $kelas->id);
-                })->avg('total');
-
-                $avgMotivasi = Angket_motivasi::whereHas('siswa', function ($query) use ($kelas) {
-                    $query->where('kelas_id', $kelas->id);
-                })->avg('total');
-
-                $avgObservasi = Observasi::where('kelas_id', $kelas->id)->avg('total');
-
-                // Skip jika data tidak lengkap
-                if (!$avgMinat || !$avgMotivasi || !$avgObservasi) {
-                    continue;
-                }
-
-                $ahpResult = $this->calculateAHP($avgMinat, $avgMotivasi, $avgObservasi);
-
-                $results[] = [
-                    'kelas_id' => $kelas->id,
-                    'nama_kelas' => $kelas->nama,
-                    'rata_rata_nilai' => [
-                        'minat' => round($avgMinat, 2),
-                        'motivasi' => round($avgMotivasi, 2),
-                        'observasi' => round($avgObservasi, 2)
-                    ],
-                    'dominan' => $ahpResult['dominan'],
-                    'persen_dominan' => $ahpResult['persen_dominan'],
-                    'percentages' => $ahpResult['percentages'],
-                    'consistency_ratio' => $ahpResult['consistency_ratio'],
-                    'is_consistent' => $ahpResult['is_consistent']
-                ];
-            }
-
-            return response()->json([
-                'success' => true,
-                'data' => $results,
-                'summary' => [
-                    'total_kelas' => count($results),
-                    'dominan_minat' => count(array_filter($results, fn($r) => $r['dominan'] === 'Minat')),
-                    'dominan_motivasi' => count(array_filter($results, fn($r) => $r['dominan'] === 'Motivasi')),
-                    'dominan_observasi' => count(array_filter($results, fn($r) => $r['dominan'] === 'Observasi')),
-                    'konsisten' => count(array_filter($results, fn($r) => $r['is_consistent'] === true))
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
-        }
     }
 }
