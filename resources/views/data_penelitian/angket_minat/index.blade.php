@@ -58,14 +58,14 @@
                             <div>
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal"
                                     data-bs-target="#importModalMinat">
-                                    <i class="icon-cloud-up"></i> Import Excel
+                                    <i class=""></i> Import Excel
                                 </button>
 
                                 <a href="{{ route('angket-minat.create') }}" class="btn btn-primary">
-                                    <i class="icon-plus"></i> Tambah Data
+                                    <i class=""></i> Tambah Data
                                 </a>
                                 <a href="{{ route('angket-minat.daftar') }}" class="btn btn-primary">
-                                    <i class="icon-plus"></i> Daftar Pertanyaan
+                                    <i class=""></i> Daftar Pertanyaan
                                 </a>
                                 @if ($dataAngket->count() > 0)
                                     {{-- <form id="clearFormMinat" method="POST"
@@ -125,11 +125,11 @@
                                                     <div class="btn-group" role="group">
                                                         <a href="{{ route('angket-minat.show', $data->id) }}"
                                                             class="btn btn-sm btn-info">
-                                                            <i class="icon-eye"></i>
+                                                            <i class=""></i>
                                                         </a>
                                                         <a href="{{ route('angket-minat.edit', $data->id) }}"
                                                             class="btn btn-sm btn-warning">
-                                                            <i class="icon-pencil"></i>
+                                                            <i class="icon-pencil"></i>edit
                                                         </a>
                                                         <form action="{{ route('angket-minat.destroy', $data->id) }}"
                                                             method="POST" style="display: inline;"
@@ -137,7 +137,7 @@
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn btn-sm btn-danger">
-                                                                <i class="icon-trash"></i>
+                                                                <i class=""></i>hapus
                                                             </button>
                                                         </form>
                                                     </div>

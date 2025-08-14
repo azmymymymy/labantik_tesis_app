@@ -58,12 +58,12 @@
                             <div>
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal"
                                     data-bs-target="#importModalHasilBelajar">
-                                    <i class="icon-cloud-up"></i> Import Excel
+                                    <i class=""></i> Import Excel
                                 </button>
                                 <a href="{{ route('hasil-belajar.create') }}" class="btn btn-primary">
-                                    <i class="icon-plus"></i> Tambah Data</a>
+                                    <i class=""></i> Tambah Data</a>
                                 <a href="{{ route('observasi.daftar') }}" class="btn btn-primary">
-                                    <i class="icon-plus"></i>  Daftar Pertanyaan
+                                    <i class=""></i>  Daftar Pertanyaan
                                 </a>
                                 @if ($observasi->count() > 0)
                                     {{-- <form id="clearFormHasilBelajar" method="POST"
@@ -118,13 +118,10 @@
                                                 <td>{{ $data->total }}</td>
                                                 <td>
                                                     <div class="btn-group" role="group">
-                                                        <a href="{{ route('observasi.show', $data->id) }}"
-                                                            class="btn btn-sm btn-info">
-                                                            <i class="icon-eye"></i>
-                                                        </a>
+                                                        
                                                         <a href="{{ route('observasi.edit', $data->id) }}"
-                                                            class="btn btn-sm btn-warning">
-                                                            <i class="icon-pencil"></i>
+                                                            class="btn btn-sm btn-warning">edit
+                                                            <i class=""></i>
                                                         </a>
                                                         <form action="{{ route('observasi.destroy', $data->id) }}"
                                                             method="POST" style="display: inline;"
@@ -132,7 +129,7 @@
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn btn-sm btn-danger">
-                                                                <i class="icon-trash"></i>
+                                                                <i class=""></i>hapus
                                                             </button>
                                                         </form>
                                                     </div>

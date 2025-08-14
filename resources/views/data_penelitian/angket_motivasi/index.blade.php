@@ -58,13 +58,13 @@
                             <div>
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal"
                                     data-bs-target="#importModalMotivasi">
-                                    <i class="icon-cloud-up"></i> Import Excel
+                                    <i class=""></i> Import Excel
                                 </button>
                                 <a href="{{ route('angket-motivasi.create') }}" class="btn btn-primary">
-                                    <i class="icon-plus"></i> Tambah Data
+                                    <i class=""></i> Tambah Data
                                 </a>
                                 <a href="{{ route('angket-motivasi.daftar') }}" class="btn btn-primary">
-                                    <i class="icon-plus"></i> Daftar Pertanyaan
+                                    <i class=""></i> Daftar Pertanyaan
                                 </a>
                                 @if ($dataAngket->count() > 0)
                                     {{-- <form id="clearFormMotivasi" method="POST"
@@ -121,7 +121,7 @@
                                                         
                                                         <a href="{{ route('angket-motivasi.edit', $data->id) }}"
                                                             class="btn btn-sm btn-warning">
-                                                            <i class="icon-pencil"></i>
+                                                            <i class=""></i>edit
                                                         </a>
                                                         <form action="{{ route('angket-motivasi.destroy', $data->id) }}"
                                                             method="POST" style="display: inline;"
@@ -129,7 +129,7 @@
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn btn-sm btn-danger">
-                                                                <i class="icon-trash"></i>
+                                                                <i class=""></i>hapus
                                                             </button>
                                                         </form>
                                                     </div>

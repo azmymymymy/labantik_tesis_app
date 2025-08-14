@@ -58,10 +58,10 @@
                             <div>
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal"
                                     data-bs-target="#importModalHasilBelajar">
-                                    <i class="icon-cloud-up"></i> Import Excel
+                                    <i class=""></i> Import Excel
                                 </button>
                                 <a href="{{ route('hasil-belajar.create') }}" class="btn btn-primary">
-                                    <i class="icon-plus"></i> Tambah Data
+                                    <i class=""></i> Tambah Data
                                 </a>
                                 @if ($dataHasilBelajar->count() > 0)
                                     {{-- <form id="clearFormHasilBelajar" method="POST"
@@ -104,13 +104,10 @@
                                                 <td>{{ $data->posttest }}</td>
                                                 <td>
                                                     <div class="btn-group" role="group">
-                                                        <a href="{{ route('hasil-belajar.show', $data->id) }}"
-                                                            class="btn btn-sm btn-info">
-                                                            <i class="icon-eye"></i>
-                                                        </a>
+                                                        
                                                         <a href="{{ route('hasil-belajar.edit', $data->id) }}"
                                                             class="btn btn-sm btn-warning">
-                                                            <i class="icon-pencil"></i>
+                                                            <i class="icon-pencil"></i> edit
                                                         </a>
                                                         <form action="{{ route('hasil-belajar.destroy', $data->id) }}"
                                                             method="POST" style="display: inline;"
@@ -118,7 +115,7 @@
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn btn-sm btn-danger">
-                                                                <i class="icon-trash"></i>
+                                                                <i class="icon-trash"></i>hapus
                                                             </button>
                                                         </form>
                                                     </div>

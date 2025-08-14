@@ -17,13 +17,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td>1</td><td>Saya memilih keinginan untuk diterima di jurusan ini</td></tr>
-                                <tr><td>2</td><td>Saya sadar memilih jurusan ini sangat penting untuk masa depan saya</td></tr>
-                                <tr><td>3</td><td>Saya mencari informasi mengenai jurusan ini dari berbagai sumber</td></tr>
-                                <tr><td>4</td><td>Saya yakin jurusan ini sesuai dengan kemampuan saya</td></tr>
-                                <tr><td>5</td><td>Jurusan ini adalah jurusan yang tepat untuk saya</td></tr>
-                                <tr><td>6</td><td>Saya merasa percaya diri untuk bersaing dengan teman-teman di jurusan ini</td></tr>
-                                <tr><td>7</td><td>Saya yakin dapat memperoleh hasil belajar yang bagus di jurusan ini</td></tr>
+                                <tr><td>1</td><td>Minat terhadap Materi Percabangan</td></tr>
+                                <tr><td>2</td><td>Minat terhadap Program Keahlian yang Dipilih</td></tr>
+                                <tr><td>3</td><td>Motivasi Belajar</td></tr>
+                                <tr><td>4</td><td>Interaksi dengan Media Scratch</td></tr>
+                                <tr><td>5</td><td>Pemahaman Konsep Percabangan</td></tr>
+                                <tr><td>6</td><td>Partisipasi Aktif dalam Kegiatan Kelas</td></tr>
+                                <tr><td>7</td><td>Hasil Proyek Scratch</td></tr>
                          </tbody>
                         </table>
                     </div>
