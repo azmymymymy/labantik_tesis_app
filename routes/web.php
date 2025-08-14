@@ -38,7 +38,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('konsentrasi', App\Http\Controllers\KonsentrasiController::class);
     Route::delete('angket-minat/clear-all', [AngketMinatController::class, 'clear'])->name('angket-minat.clear');
 
-    Route::resource('angket-minat', AngketMinatController::class);
+    Route::get('angket-minat/daftar', [AngketMinatController::class, 'daftar'])
+        ->name('angket-minat.daftar');
+        Route::get('observasi/daftar', [ObservasiController::class, 'daftar'])
+        ->name('observasi.daftar');
 
 
 
@@ -48,14 +51,20 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('angket-minat/import', [AngketMinatController::class, 'import'])->name('angket-minat.import');
     Route::get('angket-minat/export', [AngketMinatController::class, 'export'])->name('angket-minat.export');
-    Route::resource('angket-motivasi', AngketMotivasiController::class);
+    Route::resource('angket-motivasi', AngketMotivasiController::class)->except(['show']);
     Route::resource('hasil-belajar', HasilBelajarController::class);
     Route::resource('observasi', ObservasiController::class);
 
+    Route::get('angket-minat/daftar', [AngketMinatController::class, 'daftar'])
+        ->name('angket-minat.daftar');
+    Route::get('angket-motivasi/daftar', [AngketMotivasiController::class, 'daftar'])
+        ->name('angket-motivasi.daftar');
     Route::resource('ahp-kelompok', AhpKelompokController::class);
+    Route::resource('ahp', AhpIndividuController::class);
     Route::get('/ahp/search-siswa', [AhpIndividuController::class, 'searchSiswa']);
     Route::get('/ahp/calculate/{siswa_id}', [AhpIndividuController::class, 'calculateAHP']);
     Route::get('/ahp/bulk-analysis', [AhpIndividuController::class, 'bulkAnalysis']);
     // Route untuk mendapatkan daftar semua siswa
+    Route::resource('angket-minat', AngketMinatController::class);
     Route::get('/ahp/siswa-list', [AhpIndividuController::class, 'getSiswaList']);
 });

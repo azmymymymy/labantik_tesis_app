@@ -19,67 +19,67 @@ class AhpIndividuController extends Controller
     {
         $kelas = Kelas::all();
         $siswa = Siswa::all();
-        return view('data_penelitian.ahp_individu.index', compact('kelas','siswa'));
+        return view('data_penelitian.ahp_individu.index', compact('kelas', 'siswa'));
     }
 
     /**
      * Search siswa berdasarkan nama untuk dropdown Ajax
      */
     public function searchSiswa(Request $request)
-{
-    Log::info('=== SEARCH SISWA CALLED ===');
-    
-    try {
-        $query = $request->get('q', '');
-        Log::info('Query: ' . $query);
-        
-        if (strlen($query) < 2) {
-            Log::info('Query too short, returning empty');
-            return response()->json([]);
+    {
+        Log::info('=== SEARCH SISWA CALLED ===');
+
+        try {
+            $query = $request->get('q', '');
+            Log::info('Query: ' . $query);
+
+            if (strlen($query) < 2) {
+                Log::info('Query too short, returning empty');
+                return response()->json([]);
+            }
+
+            // Test basic DB connection first
+            $total_siswa = DB::table('siswa')->count();
+            Log::info('Total siswa in DB: ' . $total_siswa);
+
+            // Main query
+            $siswa = DB::table('siswa')
+                ->where('nama', 'LIKE', '%' . $query . '%')
+                ->select('id', 'nama')
+                ->limit(10)
+                ->get();
+
+            Log::info('Found ' . $siswa->count() . ' students');
+            Log::info('Students data: ' . json_encode($siswa));
+
+            $results = $siswa->map(function ($s) {
+                return [
+                    'id' => $s->id,
+                    'nama' => $s->nama,
+                    'text' => $s->nama
+                ];
+            });
+
+            Log::info('Final results: ' . json_encode($results));
+
+            return response()->json($results);
+        } catch (\Exception $e) {
+            Log::error('=== SEARCH ERROR ===');
+            Log::error('Message: ' . $e->getMessage());
+            Log::error('File: ' . $e->getFile());
+            Log::error('Line: ' . $e->getLine());
+            Log::error('Trace: ' . $e->getTraceAsString());
+
+            return response()->json([
+                'error' => $e->getMessage(),
+                'debug' => [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]
+            ], 500);
         }
+    }
 
-        // Test basic DB connection first
-        $total_siswa = DB::table('siswa')->count();
-        Log::info('Total siswa in DB: ' . $total_siswa);
-
-        // Main query
-        $siswa = DB::table('siswa')
-                   ->where('nama', 'LIKE', '%' . $query . '%')
-                   ->select('id', 'nama')
-                   ->limit(10)
-                   ->get();
-
-        Log::info('Found ' . $siswa->count() . ' students');
-        Log::info('Students data: ' . json_encode($siswa));
-
-        $results = $siswa->map(function($s) {
-            return [
-                'id' => $s->id,
-                'nama' => $s->nama,
-                'text' => $s->nama
-            ];
-        });
-
-        Log::info('Final results: ' . json_encode($results));
-
-        return response()->json($results);
-
-    } catch (\Exception $e) {
-        Log::error('=== SEARCH ERROR ===');
-        Log::error('Message: ' . $e->getMessage());
-        Log::error('File: ' . $e->getFile());
-        Log::error('Line: ' . $e->getLine());
-        Log::error('Trace: ' . $e->getTraceAsString());
-        
-        return response()->json([
-            'error' => $e->getMessage(),
-            'debug' => [
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ]
-        ], 500);
-    }}
-    
     /**
      * Get data siswa dari ketiga tabel berdasarkan siswa_id
      */
@@ -101,33 +101,33 @@ class AhpIndividuController extends Controller
 
     /**
      * Calculate AHP untuk siswa tertentu
-     * 
-     * 
+     *
+     *
      */
     public function getSiswaList()
-{
-    try {
-        $siswa = Siswa::select('id', 'nama', 'kelas_id')
-                     ->orderBy('nama', 'asc')
-                     ->get();
-        
-        return response()->json([
-            'success' => true,
-            'data' => $siswa
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal memuat data siswa'
-        ], 500);
+    {
+        try {
+            $siswa = Siswa::select('id', 'nama', 'kelas_id')
+                ->orderBy('nama', 'asc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $siswa
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat data siswa'
+            ], 500);
+        }
     }
-}
     public function calculateAHP(Request $request, $siswa_id)
     {
         try {
             // Get student data
             $data = $this->getStudentData($siswa_id);
-            
+
             // Validate if all data exists
             if (!$data['siswa'] || !$data['minat'] || !$data['motivasi'] || !$data['observasi']) {
                 return response()->json([
@@ -159,7 +159,6 @@ class AhpIndividuController extends Controller
                     'ahp_result' => $ahp_result
                 ]
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -175,19 +174,19 @@ class AhpIndividuController extends Controller
     {
         // Step 1: Create comparison matrix
         $comparison_matrix = $this->createComparisonMatrix($minat, $motivasi, $observasi);
-        
+
         // Step 2: Normalize matrix
         $normalized_matrix = $this->normalizeMatrix($comparison_matrix);
-        
+
         // Step 3: Calculate weights (priority vector)
         $weights = $this->calculateWeights($normalized_matrix);
-        
+
         // Step 4: Calculate consistency ratio
         $consistency = $this->calculateConsistency($comparison_matrix, $weights);
-        
+
         // Step 5: Determine dominance
         $dominance = $this->determineDominance($weights);
-        
+
         return [
             'comparison_matrix' => $comparison_matrix,
             'normalized_matrix' => $normalized_matrix,
@@ -207,15 +206,19 @@ class AhpIndividuController extends Controller
      */
     private function createComparisonMatrix($minat, $motivasi, $observasi)
     {
+        // Normalize values as requested
+        $minat = ($minat / 70) * 100;
+        $motivasi = ($motivasi / 40) * 100;
+        $observasi = ($observasi / 35) * 100;
         // Avoid division by zero
         $minat = max($minat, 1);
         $motivasi = max($motivasi, 1);
         $observasi = max($observasi, 1);
 
         $matrix = [
-            [1, $minat/$motivasi, $minat/$observasi],
-            [$motivasi/$minat, 1, $motivasi/$observasi],
-            [$observasi/$minat, $observasi/$motivasi, 1]
+            [1, $minat / $motivasi, $minat / $observasi],
+            [$motivasi / $minat, 1, $motivasi / $observasi],
+            [$observasi / $minat, $observasi / $motivasi, 1]
         ];
 
         return [
@@ -237,7 +240,7 @@ class AhpIndividuController extends Controller
     {
         $matrix = $comparison_data['matrix'];
         $n = count($matrix);
-        
+
         // Calculate column sums
         $column_sums = [];
         for ($j = 0; $j < $n; $j++) {
@@ -247,7 +250,7 @@ class AhpIndividuController extends Controller
             }
             $column_sums[$j] = $sum;
         }
-        
+
         // Normalize each element
         $normalized = [];
         for ($i = 0; $i < $n; $i++) {
@@ -275,7 +278,7 @@ class AhpIndividuController extends Controller
     {
         $matrix = $normalized_data['matrix'];
         $n = count($matrix);
-        
+
         $weights = [];
         for ($i = 0; $i < $n; $i++) {
             $sum = 0;
@@ -286,7 +289,9 @@ class AhpIndividuController extends Controller
         }
 
         $labels = ['Minat', 'Motivasi', 'Observasi'];
-        $percentages = array_map(function($w) { return round($w * 100, 2); }, $weights);
+        $percentages = array_map(function ($w) {
+            return round($w * 100, 2);
+        }, $weights);
 
         return [
             'raw' => $weights,
@@ -307,7 +312,7 @@ class AhpIndividuController extends Controller
         $matrix = $comparison_data['matrix'];
         $weights = $weights_data['raw'];
         $n = count($matrix);
-        
+
         // Calculate weighted sum vector
         $weighted_sum = [];
         for ($i = 0; $i < $n; $i++) {
@@ -317,7 +322,7 @@ class AhpIndividuController extends Controller
             }
             $weighted_sum[$i] = $sum;
         }
-        
+
         // Calculate lambda max
         $lambda_max = 0;
         for ($i = 0; $i < $n; $i++) {
@@ -326,16 +331,16 @@ class AhpIndividuController extends Controller
             }
         }
         $lambda_max = $lambda_max / $n;
-        
+
         // Calculate CI and CR
         $ci = ($lambda_max - $n) / ($n - 1);
         $ri = [0, 0, 0.58, 0.9, 1.12, 1.24, 1.32, 1.41]; // Random Index
-        $cr = $n > 2 ? $ci / $ri[$n-1] : 0;
-        
+        $cr = $n > 2 ? $ci / $ri[$n - 1] : 0;
+
         return [
             'lambda_max' => round($lambda_max, 4),
             'ci' => round($ci, 4),
-            'ri' => $ri[$n-1] ?? 0,
+            'ri' => $ri[$n - 1] ?? 0,
             'cr' => round($cr, 4),
             'is_consistent' => $cr < 0.1
         ];
@@ -347,10 +352,10 @@ class AhpIndividuController extends Controller
     private function determineDominance($weights_data)
     {
         $labeled = $weights_data['labeled'];
-        
+
         // Sort by percentage
         arsort($labeled);
-        
+
         $ranking = [];
         $rank = 1;
         foreach ($labeled as $criteria => $percentage) {
@@ -360,9 +365,9 @@ class AhpIndividuController extends Controller
                 'percentage' => $percentage
             ];
         }
-        
+
         $dominant = $ranking[0];
-        
+
         return [
             'dominant_criteria' => $dominant['criteria'],
             'dominant_percentage' => $dominant['percentage'],
@@ -396,17 +401,17 @@ class AhpIndividuController extends Controller
     public function bulkAnalysis(Request $request)
     {
         $kelas_id = $request->get('kelas_id');
-        
+
         $query = Siswa::with(['angketMinat', 'angketMotivasi', 'observasi', 'kelas']);
-        
+
         if ($kelas_id) {
             $query->where('kelas_id', $kelas_id);
         }
-        
+
         $students = $query->get();
-        
+
         $results = [];
-        
+
         foreach ($students as $siswa) {
             if ($siswa->angketMinat && $siswa->angketMotivasi && $siswa->observasi) {
                 $ahp_result = $this->performAHPCalculation(
@@ -414,7 +419,7 @@ class AhpIndividuController extends Controller
                     $siswa->angketMotivasi->total,
                     $siswa->observasi->total
                 );
-                
+
                 $results[] = [
                     'siswa' => [
                         'id' => $siswa->id,
@@ -430,7 +435,7 @@ class AhpIndividuController extends Controller
                 ];
             }
         }
-        
+
         return response()->json([
             'success' => true,
             'data' => $results,
@@ -448,21 +453,21 @@ class AhpIndividuController extends Controller
             'Motivasi' => 0,
             'Observasi' => 0
         ];
-        
+
         foreach ($results as $result) {
             $dominant = $result['dominance']['dominant_criteria'];
             if (isset($criteria_count[$dominant])) {
                 $criteria_count[$dominant]++;
             }
         }
-        
+
         $total = count($results);
         $percentages = [];
-        
+
         foreach ($criteria_count as $criteria => $count) {
             $percentages[$criteria] = $total > 0 ? round(($count / $total) * 100, 2) : 0;
         }
-        
+
         return [
             'total_students' => $total,
             'criteria_distribution' => $criteria_count,

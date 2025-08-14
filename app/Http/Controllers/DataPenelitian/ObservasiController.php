@@ -15,6 +15,9 @@ class ObservasiController extends Controller
         $observasi = Observasi::all();
         return view('data_penelitian.observasi.index', compact('observasi'));
     }
+    public function daftar(){
+        return view('data_penelitian.observasi.daftar');
+    }
 
     public function store(Request $request)
     {
@@ -35,7 +38,7 @@ class ObservasiController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            
+
             'pertanyaan_1' => 'required|numeric|max:5|min:1',
             'pertanyaan_2' => 'required|numeric|max:5|min:1',
             'pertanyaan_3' => 'required|numeric|max:5|min:1',
@@ -59,5 +62,5 @@ class ObservasiController extends Controller
         return redirect()->route('observasi.index')->with('success', 'Data observasi berhasil dihapus!');
     }
 
-    
+
 }

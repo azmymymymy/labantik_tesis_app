@@ -60,8 +60,12 @@
                                     data-bs-target="#importModalMinat">
                                     <i class="icon-cloud-up"></i> Import Excel
                                 </button>
+
                                 <a href="{{ route('angket-minat.create') }}" class="btn btn-primary">
                                     <i class="icon-plus"></i> Tambah Data
+                                </a>
+                                <a href="{{ route('angket-minat.daftar') }}" class="btn btn-primary">
+                                    <i class="icon-plus"></i> Daftar Pertanyaan
                                 </a>
                                 @if ($dataAngket->count() > 0)
                                     {{-- <form id="clearFormMinat" method="POST"
