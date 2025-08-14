@@ -123,13 +123,10 @@
                                                 <td><strong>{{ $data->total }}</strong></td>
                                                 <td>
                                                     <div class="btn-group" role="group">
-                                                        <a href="{{ route('angket-minat.show', $data->id) }}"
-                                                            class="btn btn-sm btn-info">
-                                                            <i class=""></i>
-                                                        </a>
+                                                        
                                                         <a href="{{ route('angket-minat.edit', $data->id) }}"
                                                             class="btn btn-sm btn-warning">
-                                                            <i class="icon-pencil"></i>edit
+                                                            <i class=""></i>edit
                                                         </a>
                                                         <form action="{{ route('angket-minat.destroy', $data->id) }}"
                                                             method="POST" style="display: inline;"
