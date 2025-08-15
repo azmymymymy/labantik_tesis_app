@@ -6,12 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Angket_motivasi;
 use App\Models\AngketMinat;
 use App\Models\Observasi;
-use App\Models\Hasil_belajar;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Log; // <-- TAMBAHKAN INI
+use App\Models\Hasil_belajar;
 
 
 class AhpIndividuController extends Controller
@@ -84,14 +84,14 @@ class AhpIndividuController extends Controller
     /**
      * Get data siswa dari ketiga tabel berdasarkan siswa_id
      */
-    public function getStudentData($siswa_id)
+   public function getStudentData($siswa_id)
     {
-        // Get data from all three tables + hasil belajar
+        // Get data from all related tables
+        $siswa = Siswa::with('kelas')->find($siswa_id);
         $minat = AngketMinat::where('siswa_id', $siswa_id)->first();
         $motivasi = Angket_motivasi::where('siswa_id', $siswa_id)->first();
         $observasi = Observasi::where('siswa_id', $siswa_id)->first();
         $hasil_belajar = Hasil_belajar::where('siswa_id', $siswa_id)->first();
-        $siswa = Siswa::with('kelas')->find($siswa_id);
 
         return [
             'siswa' => $siswa,
@@ -104,6 +104,8 @@ class AhpIndividuController extends Controller
 
     /**
      * Calculate AHP untuk siswa tertentu
+     *
+     *
      */
     public function getSiswaList()
     {
@@ -123,7 +125,6 @@ class AhpIndividuController extends Controller
             ], 500);
         }
     }
-
     public function calculateAHP(Request $request, $siswa_id)
     {
         try {
@@ -131,10 +132,10 @@ class AhpIndividuController extends Controller
             $data = $this->getStudentData($siswa_id);
 
             // Validate if all data exists
-            if (!$data['siswa'] || !$data['minat'] || !$data['motivasi'] || !$data['observasi']) {
+            if (!$data['siswa']) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Data tidak lengkap untuk siswa ini'
+                    'message' => 'Data siswa tidak ditemukan'
                 ]);
             }
 
@@ -144,14 +145,17 @@ class AhpIndividuController extends Controller
 
             // Calculate AHP
             $ahp_result = $this->performAHPCalculation($minat_total, $motivasi_total, $observasi_total);
-
-            // Calculate Hake Analysis if hasil_belajar exists
-            $hake_analysis = null;
-            if ($data['hasil_belajar']) {
-                $hake_analysis = $this->calculateHakeAnalysis(
-                    $data['hasil_belajar']->pretest ?? 0,
-                    $data['hasil_belajar']->posttest ?? 0,
-                    $ahp_result['weights']['raw']
+            
+            // Get learning results from Hasil_belajar model
+            $hasil_belajar = Hasil_belajar::where('siswa_id', $siswa_id)->first();
+            
+            // Calculate Hake's Normalized Gain if pretest and posttest exist
+            $hake_gain = null;
+            if ($hasil_belajar && !is_null($hasil_belajar->pretest) && !is_null($hasil_belajar->posttest)) {
+                $hake_gain = $this->calculateHakeGain(
+                    $hasil_belajar->pretest,
+                    $hasil_belajar->posttest,
+                    100 // assuming max score is 100
                 );
             }
 
@@ -168,12 +172,12 @@ class AhpIndividuController extends Controller
                         'motivasi' => $motivasi_total,
                         'observasi' => $observasi_total
                     ],
-                    'hasil_belajar' => $data['hasil_belajar'] ? [
-                        'pretest' => $data['hasil_belajar']->pretest,
-                        'posttest' => $data['hasil_belajar']->posttest
+                    'test_scores' => $hasil_belajar ? [
+                        'pretest' => $hasil_belajar->pretest,
+                        'posttest' => $hasil_belajar->posttest
                     ] : null,
                     'ahp_result' => $ahp_result,
-                    'hake_analysis' => $hake_analysis
+                    'hake_gain' => $hake_gain
                 ]
             ]);
         } catch (\Exception $e) {
@@ -182,6 +186,58 @@ class AhpIndividuController extends Controller
                 'message' => 'Error calculating AHP: ' . $e->getMessage()
             ]);
         }
+    }
+    private function calculateHakeGain($pretest, $posttest, $max_score = 100)
+    {
+        // Avoid division by zero
+        if ($pretest >= $max_score) {
+            return [
+                'gain' => 0,
+                'normalized_gain' => 0,
+                'interpretation' => 'Pretest already at maximum score'
+            ];
+        }
+
+        $gain = $posttest - $pretest;
+        $normalized_gain = $gain / ($max_score - $pretest);
+
+        // Determine interpretation
+        $interpretation = '';
+        if ($normalized_gain >= 0.7) {
+            $interpretation = 'Tinggi';
+        } elseif ($normalized_gain >= 0.3) {
+            $interpretation = 'Sedang';
+        } else {
+            $interpretation = 'Rendah';
+        }
+
+        return [
+            'pretest' => $pretest,
+            'posttest' => $posttest,
+            'gain' => $gain,
+            'normalized_gain' => round($normalized_gain, 4),
+            'percentage_gain' => round($normalized_gain * 100, 2),
+            'interpretation' => $interpretation,
+            'description' => $this->getHakeInterpretation($normalized_gain, $gain)
+        ];
+    }
+
+    /**
+     * Get interpretation for Hake's gain
+     */
+    private function getHakeInterpretation($normalized_gain, $raw_gain)
+    {
+        $interpretation = '';
+        
+        if ($normalized_gain >= 0.7) {
+            $interpretation = "Peningkatan sangat signifikan (gain = {$raw_gain})";
+        } elseif ($normalized_gain >= 0.3) {
+            $interpretation = "Peningkatan cukup signifikan (gain = {$raw_gain})";
+        } else {
+            $interpretation = "Peningkatan kurang signifikan (gain = {$raw_gain})";
+        }
+
+        return $interpretation . ". Disarankan untuk meningkatkan intervensi pembelajaran, terutama pada faktor dominan.";
     }
 
     /**
@@ -198,8 +254,8 @@ class AhpIndividuController extends Controller
         // Step 3: Calculate weights (priority vector)
         $weights = $this->calculateWeights($normalized_matrix);
 
-        // Step 4: Calculate consistency ratio (UPDATED)
-        $consistency = $this->calculateConsistencyDetailed($comparison_matrix, $weights);
+        // Step 4: Calculate consistency ratio
+        $consistency = $this->calculateConsistency($comparison_matrix, $weights);
 
         // Step 5: Determine dominance
         $dominance = $this->determineDominance($weights);
@@ -227,7 +283,6 @@ class AhpIndividuController extends Controller
         $minat = ($minat / 70) * 100;
         $motivasi = ($motivasi / 50) * 100;
         $observasi = ($observasi / 35) * 100;
-        
         // Avoid division by zero
         $minat = max($minat, 1);
         $motivasi = max($motivasi, 1);
@@ -242,11 +297,6 @@ class AhpIndividuController extends Controller
         return [
             'matrix' => $matrix,
             'labels' => ['Minat', 'Motivasi', 'Observasi'],
-            'normalized_values' => [
-                'minat' => $minat,
-                'motivasi' => $motivasi,
-                'observasi' => $observasi
-            ],
             'formatted' => [
                 ['', 'Minat', 'Motivasi', 'Observasi'],
                 ['Minat', round($matrix[0][0], 4), round($matrix[0][1], 4), round($matrix[0][2], 4)],
@@ -328,128 +378,45 @@ class AhpIndividuController extends Controller
     }
 
     /**
-     * Calculate detailed consistency ratio with step-by-step calculation
+     * Calculate consistency ratio
      */
-    private function calculateConsistencyDetailed($comparison_data, $weights_data)
+    private function calculateConsistency($comparison_data, $weights_data)
     {
         $matrix = $comparison_data['matrix'];
         $weights = $weights_data['raw'];
         $n = count($matrix);
 
-        // Step 1: Multiply each row with weights
-        $weighted_products = [];
-        $lambda_calculations = [];
-        
+        // Calculate weighted sum vector
+        $weighted_sum = [];
         for ($i = 0; $i < $n; $i++) {
-            $weighted_sum = 0;
+            $sum = 0;
             for ($j = 0; $j < $n; $j++) {
-                $weighted_sum += $matrix[$i][$j] * $weights[$j];
+                $sum += $matrix[$i][$j] * $weights[$j];
             }
-            $weighted_products[$i] = $weighted_sum;
-            
-            // Calculate lambda for each row
-            $lambda_i = $weights[$i] != 0 ? $weighted_sum / $weights[$i] : 0;
-            $lambda_calculations[$i] = $lambda_i;
+            $weighted_sum[$i] = $sum;
         }
 
-        // Step 2: Calculate lambda max
-        $lambda_max = array_sum($lambda_calculations) / $n;
+        // Calculate lambda max
+        $lambda_max = 0;
+        for ($i = 0; $i < $n; $i++) {
+            if ($weights[$i] != 0) {
+                $lambda_max += $weighted_sum[$i] / $weights[$i];
+            }
+        }
+        $lambda_max = $lambda_max / $n;
 
-        // Step 3: Calculate CI and CR
+        // Calculate CI and CR
         $ci = ($lambda_max - $n) / ($n - 1);
         $ri = [0, 0, 0.58, 0.9, 1.12, 1.24, 1.32, 1.41]; // Random Index
         $cr = $n > 2 ? $ci / $ri[$n - 1] : 0;
 
-        // Determine consistency level
-        $consistency_level = '';
-        if ($cr < 0.1) {
-            $consistency_level = 'Konsisten';
-        } elseif ($cr < 0.2) {
-            $consistency_level = 'Dapat Diterima';
-        } else {
-            $consistency_level = 'Tidak Konsisten';
-        }
-
         return [
-            'weighted_products' => $weighted_products,
-            'lambda_calculations' => $lambda_calculations,
-            'lambda_max' => round($lambda_max, 6),
-            'ci' => round($ci, 6),
+            'lambda_max' => round($lambda_max, 4),
+            'ci' => round($ci, 4),
             'ri' => $ri[$n - 1] ?? 0,
-            'cr' => round($cr, 6),
-            'is_consistent' => $cr < 0.1,
-            'consistency_level' => $consistency_level,
-            'detailed_steps' => [
-                'step1' => "Kalikan setiap baris matriks dengan bobot:",
-                'step2' => [
-                    'minat' => "({$matrix[0][0]} × {$weights[0]}) + ({$matrix[0][1]} × {$weights[1]}) + ({$matrix[0][2]} × {$weights[2]}) = " . round($weighted_products[0], 6),
-                    'motivasi' => "({$matrix[1][0]} × {$weights[0]}) + ({$matrix[1][1]} × {$weights[1]}) + ({$matrix[1][2]} × {$weights[2]}) = " . round($weighted_products[1], 6),
-                    'observasi' => "({$matrix[2][0]} × {$weights[0]}) + ({$matrix[2][1]} × {$weights[1]}) + ({$matrix[2][2]} × {$weights[2]}) = " . round($weighted_products[2], 6)
-                ],
-                'step3' => "λ_max = (" . round($lambda_calculations[0], 4) . " + " . round($lambda_calculations[1], 4) . " + " . round($lambda_calculations[2], 4) . ") / 3 = " . round($lambda_max, 6)
-            ]
+            'cr' => round($cr, 4),
+            'is_consistent' => $cr < 0.1
         ];
-    }
-
-    /**
-     * Calculate Hake Normalized Gain Analysis
-     */
-    private function calculateHakeAnalysis($pretest, $posttest, $weights)
-    {
-        // Basic calculations
-        $gain_simple = $posttest - $pretest;
-        $max_score = 100; // Assuming max score is 100
-        
-        // Normalized Gain (Hake formula)
-        $normalized_gain = ($max_score - $pretest) != 0 ? $gain_simple / ($max_score - $pretest) : 0;
-        
-        // Determine Hake category
-        $hake_category = '';
-        if ($normalized_gain >= 0.7) {
-            $hake_category = 'Tinggi';
-        } elseif ($normalized_gain >= 0.3) {
-            $hake_category = 'Sedang';
-        } else {
-            $hake_category = 'Rendah';
-        }
-
-        // Calculate weighted score using AHP weights
-        $weighted_score = ($weights[0] * ($pretest * 77.142857/100)) + 
-                         ($weights[1] * ($pretest * 76/100)) + 
-                         ($weights[2] * ($pretest * 62.857143/100));
-
-        return [
-            'pretest' => $pretest,
-            'posttest' => $posttest,
-            'gain_simple' => $gain_simple,
-            'max_score' => $max_score,
-            'normalized_gain' => round($normalized_gain, 4),
-            'normalized_gain_percentage' => round($normalized_gain * 100, 2),
-            'hake_category' => $hake_category,
-            'weighted_score' => round($weighted_score, 2),
-            'interpretation' => $this->getHakeInterpretation($normalized_gain, $hake_category, $gain_simple)
-        ];
-    }
-
-    /**
-     * Get Hake interpretation
-     */
-    private function getHakeInterpretation($normalized_gain, $category, $simple_gain)
-    {
-        $interpretation = "Peningkatan {$simple_gain} poin secara absolut memang ada, ";
-        
-        if ($category == 'Tinggi') {
-            $interpretation .= "dan jika diukur dengan normalized gain, kategori peningkatannya tinggi (g = " . round($normalized_gain, 4) . "). ";
-            $interpretation .= "Ini menunjukkan bahwa intervensi pembelajaran yang diberikan sangat efektif dalam meningkatkan capaian hasil belajar.";
-        } elseif ($category == 'Sedang') {
-            $interpretation .= "dan jika diukur dengan normalized gain, kategori peningkatannya sedang (g = " . round($normalized_gain, 4) . "). ";
-            $interpretation .= "Ini menunjukkan bahwa intervensi pembelajaran yang diberikan cukup efektif, namun masih ada ruang untuk perbaikan.";
-        } else {
-            $interpretation .= "tapi jika diukur dengan normalized gain, kategori peningkatannya rendah (g = " . round($normalized_gain, 4) . "). ";
-            $interpretation .= "Ini berarti intervensi pembelajaran yang diberikan belum optimal meningkatkan capaian hasil belajar, sehingga strategi penguatan minat dan motivasi perlu ditingkatkan.";
-        }
-
-        return $interpretation;
     }
 
     /**
@@ -508,7 +475,7 @@ class AhpIndividuController extends Controller
     {
         $kelas_id = $request->get('kelas_id');
 
-        $query = Siswa::with(['angketMinat', 'angketMotivasi', 'observasi', 'kelas', 'hasilBelajar']);
+        $query = Siswa::with(['angketMinat', 'angketMotivasi', 'observasi', 'kelas']);
 
         if ($kelas_id) {
             $query->where('kelas_id', $kelas_id);
@@ -526,16 +493,6 @@ class AhpIndividuController extends Controller
                     $siswa->observasi->total
                 );
 
-                // Calculate Hake if hasil belajar exists
-                $hake_analysis = null;
-                if ($siswa->hasilBelajar) {
-                    $hake_analysis = $this->calculateHakeAnalysis(
-                        $siswa->hasilBelajar->pretest,
-                        $siswa->hasilBelajar->posttest,
-                        $ahp_result['weights']['raw']
-                    );
-                }
-
                 $results[] = [
                     'siswa' => [
                         'id' => $siswa->id,
@@ -547,8 +504,7 @@ class AhpIndividuController extends Controller
                         'motivasi' => $siswa->angketMotivasi->total,
                         'observasi' => $siswa->observasi->total
                     ],
-                    'dominance' => $ahp_result['dominance'],
-                    'hake_analysis' => $hake_analysis
+                    'dominance' => $ahp_result['dominance']
                 ];
             }
         }
@@ -571,44 +527,24 @@ class AhpIndividuController extends Controller
             'Observasi' => 0
         ];
 
-        $hake_count = [
-            'Tinggi' => 0,
-            'Sedang' => 0,
-            'Rendah' => 0
-        ];
-
         foreach ($results as $result) {
             $dominant = $result['dominance']['dominant_criteria'];
             if (isset($criteria_count[$dominant])) {
                 $criteria_count[$dominant]++;
             }
-
-            if (isset($result['hake_analysis']['hake_category'])) {
-                $hake_category = $result['hake_analysis']['hake_category'];
-                if (isset($hake_count[$hake_category])) {
-                    $hake_count[$hake_category]++;
-                }
-            }
         }
 
         $total = count($results);
-        $criteria_percentages = [];
-        $hake_percentages = [];
+        $percentages = [];
 
         foreach ($criteria_count as $criteria => $count) {
-            $criteria_percentages[$criteria] = $total > 0 ? round(($count / $total) * 100, 2) : 0;
-        }
-
-        foreach ($hake_count as $category => $count) {
-            $hake_percentages[$category] = $total > 0 ? round(($count / $total) * 100, 2) : 0;
+            $percentages[$criteria] = $total > 0 ? round(($count / $total) * 100, 2) : 0;
         }
 
         return [
             'total_students' => $total,
             'criteria_distribution' => $criteria_count,
-            'criteria_percentages' => $criteria_percentages,
-            'hake_distribution' => $hake_count,
-            'hake_percentages' => $hake_percentages
+            'criteria_percentages' => $percentages
         ];
     }
 }
