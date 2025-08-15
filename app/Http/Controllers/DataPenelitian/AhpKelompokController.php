@@ -607,64 +607,103 @@ class AhpKelompokController extends Controller
     }
 
     /**
-     * Method tambahan untuk menghitung Normalized Gain (opsional, jika diperlukan)
-     */
-    /**
-     * Method tambahan untuk menghitung Normalized Gain dengan skor maksimum 100
+     * Method untuk menghitung Normalized Gain (Hake) dengan rumus lengkap
      */
     public function calculateNormalizedGain($pretest, $posttest, $maxScore = 100)
     {
-        $gain = $posttest - $pretest;
+        // Hitung gain absolut
+        $gainAbsolut = $posttest - $pretest;
+
+        // Hitung maximum possible gain
         $maxPossibleGain = $maxScore - $pretest;
 
+        // Jika pretest sudah maksimal, tidak bisa dihitung normalized gain
         if ($maxPossibleGain == 0) {
             return [
-                'pretest' => $pretest,
-                'posttest' => $posttest,
-                'gain_absolut' => $gain,
-                'max_possible_gain' => 0,
+                'data_dasar' => [
+                    'pretest' => round($pretest, 2),
+                    'posttest' => round($posttest, 2),
+                    'max_score' => $maxScore,
+                    'gain_absolut' => $gainAbsolut,
+                    'max_possible_gain' => 0,
+                ],
+                'rumus' => [
+                    'formula' => 'g = (Posttest - Pretest) ÷ (Skor Maksimum - Pretest)',
+                    'substitusi' => "g = ({$posttest} - {$pretest}) ÷ ({$maxScore} - {$pretest})",
+                    'calculation' => "g = {$gainAbsolut} ÷ 0",
+                    'note' => 'Tidak dapat dihitung karena pretest sudah mencapai skor maksimum'
+                ],
                 'normalized_gain' => 0,
                 'category' => 'Tidak dapat dihitung',
+                'kriteria_hake' => [
+                    'tinggi' => 'g ≥ 0.7',
+                    'sedang' => '0.3 ≤ g < 0.7',
+                    'rendah' => 'g < 0.3'
+                ],
                 'interpretation' => [
                     'Pretest sudah mencapai skor maksimum.',
-                    'Tidak ada ruang untuk peningkatan.'
+                    'Tidak ada ruang untuk peningkatan.',
+                    'Intervensi pembelajaran tidak dapat dievaluasi menggunakan normalized gain.'
                 ]
             ];
         }
 
-        $normalizedGain = $gain / $maxPossibleGain;
+        // Hitung normalized gain
+        $normalizedGain = $gainAbsolut / $maxPossibleGain;
 
-        // Kategori Hake
+        // Kategori berdasarkan kriteria Hake
         $category = '';
+        $categoryDescription = '';
         if ($normalizedGain >= 0.7) {
             $category = 'Tinggi';
+            $categoryDescription = 'g ≥ 0.7';
         } elseif ($normalizedGain >= 0.3) {
             $category = 'Sedang';
+            $categoryDescription = '0.3 ≤ g < 0.7';
         } else {
             $category = 'Rendah';
+            $categoryDescription = 'g < 0.3';
         }
 
         return [
-            'pretest' => $pretest,
-            'posttest' => $posttest,
-            'gain_absolut' => $gain,
-            'max_possible_gain' => $maxPossibleGain,
+            'data_dasar' => [
+                'pretest' => round($pretest, 2),
+                'posttest' => round($posttest, 2),
+                'max_score' => $maxScore,
+                'gain_absolut' => round($gainAbsolut, 2),
+                'max_possible_gain' => round($maxPossibleGain, 2),
+            ],
+            'rumus' => [
+                'formula' => 'g = (Posttest - Pretest) ÷ (Skor Maksimum - Pretest)',
+                'substitusi' => "g = ({$posttest} - {$pretest}) ÷ ({$maxScore} - {$pretest})",
+                'calculation' => "g = {$gainAbsolut} ÷ {$maxPossibleGain}",
+                'hasil' => "g = " . round($normalizedGain, 4)
+            ],
             'normalized_gain' => round($normalizedGain, 4),
             'category' => $category,
-            'interpretation' => $this->getGainInterpretation($normalizedGain, $gain, $category)
+            'category_description' => $categoryDescription,
+            'kriteria_hake' => [
+                'tinggi' => 'g ≥ 0.7 (Tinggi)',
+                'sedang' => '0.3 ≤ g < 0.7 (Sedang)',
+                'rendah' => 'g < 0.3 (Rendah)',
+                'referensi' => 'Hake, R.R. (1998)'
+            ],
+            'interpretation' => $this->getGainInterpretation($normalizedGain, $gainAbsolut, $category, $pretest, $posttest)
         ];
     }
 
     /**
      * Interpretasi Normalized Gain dengan penjelasan yang lebih komprehensif
      */
-    private function getGainInterpretation($normalizedGain, $absoluteGain, $category)
+    private function getGainInterpretation($normalizedGain, $absoluteGain, $category, $pretest, $posttest)
     {
         $interpretation = [];
 
-        $interpretation[] = "Peningkatan absolut: " . $absoluteGain . " poin dari skor maksimum 100.";
+        // Interpretasi dasar
+        $interpretation[] = "Peningkatan absolut: {$absoluteGain} poin dari skor maksimum 100.";
         $interpretation[] = "Normalized Gain (g): " . round($normalizedGain, 4) . " → kategori " . strtolower($category) . ".";
 
+        // Interpretasi berdasarkan kategori
         if ($category == 'Rendah') {
             $interpretation[] = "Intervensi pembelajaran yang diberikan belum optimal meningkatkan capaian hasil belajar.";
             $interpretation[] = "Strategi penguatan minat dan motivasi perlu ditingkatkan secara signifikan.";
@@ -684,6 +723,13 @@ class AhpKelompokController extends Controller
             $interpretation[] = "Perhatian: Terdapat penurunan hasil belajar yang perlu segera ditangani.";
         } elseif ($normalizedGain > 1) {
             $interpretation[] = "Catatan: Nilai normalized gain > 1 menunjukkan peningkatan yang melebihi ekspektasi maksimal.";
+        }
+
+        // Interpretasi kontekstual
+        if ($pretest < 50 && $category == 'Rendah') {
+            $interpretation[] = "Meskipun gain rendah, dengan pretest yang rendah ({$pretest}), masih ada potensi besar untuk peningkatan.";
+        } elseif ($pretest > 80 && $category == 'Sedang') {
+            $interpretation[] = "Dengan pretest yang sudah tinggi ({$pretest}), gain sedang masih menunjukkan efektivitas pembelajaran.";
         }
 
         return $interpretation;
