@@ -208,7 +208,7 @@ class AhpIndividuController extends Controller
     {
         // Normalize values as requested
         $minat = ($minat / 70) * 100;
-        $motivasi = ($motivasi / 40) * 100;
+        $motivasi = ($motivasi / 50) * 100;
         $observasi = ($observasi / 35) * 100;
         // Avoid division by zero
         $minat = max($minat, 1);
