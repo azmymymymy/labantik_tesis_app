@@ -11,6 +11,40 @@
             transform: translateY(-5px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
         }
+         .hake-gain-card {
+            border-left: 4px solid #6c757d;
+        }
+        .hake-gain-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .hake-gain-high {
+            color: #28a745;
+        }
+        .hake-gain-medium {
+            color: #ffc107;
+        }
+        .hake-gain-low {
+            color: #dc3545;
+        }
+        .hake-gain-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .hake-gain-comparison {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .hake-gain-comparison-item {
+            text-align: center;
+            flex: 1;
+            padding: 5px;
+        }
+        .hake-gain-comparison-value {
+            font-weight: bold;
+        }
 
         .autocomplete-items {
             position: absolute;
@@ -71,20 +105,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        .consistency-badge {
-            font-size: 0.85rem;
-            padding: 0.375rem 0.75rem;
-        }
-
-        .hake-category {
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .hake-category.tinggi { color: #28a745; }
-        .hake-category.sedang { color: #ffc107; }
-        .hake-category.rendah { color: #dc3545; }
     </style>
 @endpush
 
@@ -110,6 +130,22 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- <!-- Search Box -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="autocomplete" style="width: 100%;">
+                                <input type="text"
+                                       id="siswaSearch"
+                                       class="form-control"
+                                       placeholder="Cari siswa (minimal 2 karakter)..."
+                                       autocomplete="off">
+                                <div id="autocompleteResults" class="autocomplete-items"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div> --}}
 
                 <!-- Daftar Siswa -->
                 <div class="card mt-3">
@@ -185,19 +221,108 @@
                 <div id="individuResults" class="d-none mt-3">
                     <!-- Hasil akan ditampilkan di sini -->
                 </div>
+
+                <!-- Hake's Gain Summary (visible after analysis) -->
+                <div id="hakeSummary" class="card mt-3 d-none">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Analisis Peningkatan Belajar (Hake's Normalized Gain)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="hake-gain-card p-3">
+                                    <div class="text-center">
+                                        <div class="hake-gain-label">Normalized Gain</div>
+                                        <div id="hakeGainValue" class="hake-gain-value">0.00</div>
+                                        <div id="hakeGainCategory" class="badge">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="hake-gain-comparison">
+                                    <div class="hake-gain-comparison-item">
+                                        <div class="hake-gain-label">Pretest</div>
+                                        <div id="hakePretest" class="hake-gain-comparison-value">0</div>
+                                    </div>
+                                    <div class="hake-gain-comparison-item">
+                                        <div class="hake-gain-label">Posttest</div>
+                                        <div id="hakePosttest" class="hake-gain-comparison-value">0</div>
+                                    </div>
+                                    <div class="hake-gain-comparison-item">
+                                        <div class="hake-gain-label">Gain</div>
+                                        <div id="hakeGain" class="hake-gain-comparison-value">0</div>
+                                    </div>
+                                    <div class="hake-gain-comparison-item">
+                                        <div class="hake-gain-label">% Peningkatan</div>
+                                        <div id="hakePercentage" class="hake-gain-comparison-value">0%</div>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <div id="hakeInterpretation" class="alert">
+                                        Pilih siswa untuk melihat analisis peningkatan belajar.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="alert alert-secondary py-2">
+                                <small>
+                                    <strong>Kriteria Hake:</strong> 
+                                    g ≥ 0.7 (Tinggi) | 0.3 ≤ g < 0.7 (Sedang) | g < 0.3 (Rendah)
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
 @endsection
 
 @push('scripts')
 <script>
+
+
     $(document).ready(function() {
+        // Autocomplete siswa
+        $('#siswaSearch').on('input', function() {
+            const query = $(this).val();
+            if (query.length < 2) {
+                $('#autocompleteResults').empty();
+                return;
+            }
+
+            $.get('/ahp/search-siswa', { q: query }, function(data) {
+                $('#autocompleteResults').empty();
+                if (data.length === 0) {
+                    $('#autocompleteResults').append('<div>No results found</div>');
+                    return;
+                }
+
+                data.forEach(function(siswa) {
+                    const item = $('<div></div>')
+                        .text(siswa.text)
+                        .data('siswa', siswa)
+                        .click(function() {
+                            $('#siswaSearch').val(siswa.nama);
+                            $('#autocompleteResults').empty();
+                            loadSiswaData(siswa.id, siswa.nama);
+                        });
+                    $('#autocompleteResults').append(item);
+                });
+            });
+        });
+
         // Event handler untuk tombol analisis AHP
         $('.analyze-btn').on('click', function(e) {
             e.stopPropagation();
             const siswaId = $(this).data('siswa-id');
             const siswaNama = $(this).data('siswa-nama');
+
+            // Reset search box
+            $('#siswaSearch').val(siswaNama);
+            $('#autocompleteResults').empty();
 
             // Load data AHP
             loadSiswaData(siswaId, siswaNama, $(this));
@@ -326,9 +451,48 @@
 
         // Render hasil AHP
         function renderAHPResult(data) {
-            const { siswa, raw_scores, hasil_belajar, ahp_result, hake_analysis } = data;
-            const { comparison_matrix, normalized_matrix, weights, consistency_ratio, dominance } = ahp_result;
+    const { siswa, raw_scores, test_scores, ahp_result, hake_gain } = data;
+    const { comparison_matrix, normalized_matrix, weights, consistency_ratio, dominance } = ahp_result;
 
+    // Update Hake's gain display
+    if (hake_gain) {
+        $('#hakeSummary').removeClass('d-none');
+        $('#hakeGainValue').text(hake_gain.normalized_gain.toFixed(4));
+        $('#hakePretest').text(hake_gain.pretest);
+        $('#hakePosttest').text(hake_gain.posttest);
+        $('#hakeGain').text(hake_gain.gain);
+        $('#hakePercentage').text(hake_gain.percentage_gain + '%');
+        
+        // Set category styling
+        const $category = $('#hakeGainCategory');
+        $category.text(hake_gain.interpretation);
+        
+        if (hake_gain.interpretation === 'Tinggi') {
+            $category.removeClass('badge-warning badge-danger').addClass('badge-success');
+            $('#hakeGainValue').removeClass('hake-gain-medium hake-gain-low').addClass('hake-gain-high');
+        } else if (hake_gain.interpretation === 'Sedang') {
+            $category.removeClass('badge-success badge-danger').addClass('badge-warning');
+            $('#hakeGainValue').removeClass('hake-gain-high hake-gain-low').addClass('hake-gain-medium');
+        } else {
+            $category.removeClass('badge-success badge-warning').addClass('badge-danger');
+            $('#hakeGainValue').removeClass('hake-gain-high hake-gain-medium').addClass('hake-gain-low');
+        }
+        
+        // Set interpretation
+        const $interpretation = $('#hakeInterpretation');
+        $interpretation.text(hake_gain.description);
+        $interpretation.removeClass('alert-success alert-warning alert-danger');
+        
+        if (hake_gain.interpretation === 'Tinggi') {
+            $interpretation.addClass('alert-success');
+        } else if (hake_gain.interpretation === 'Sedang') {
+            $interpretation.addClass('alert-warning');
+        } else {
+            $interpretation.addClass('alert-danger');
+        }
+    } else {
+        $('#hakeSummary').addClass('d-none');
+    }
             let html = `
             <div class="card">
                 <div class="card-header bg-primary text-white">
@@ -360,30 +524,6 @@
                                     </ul>
                                 </div>
                             </div>
-
-                            ${hasil_belajar ? `
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h5 class="mb-0">Data Hasil Belajar</h5>
-                                </div>
-                                <div class="card-body">
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Pretest
-                                            <span class="badge bg-info">${hasil_belajar.pretest}</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Posttest
-                                            <span class="badge bg-success">${hasil_belajar.posttest}</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Gain
-                                            <span class="badge bg-warning">${hasil_belajar.posttest - hasil_belajar.pretest}</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            ` : ''}
 
                             <div class="card">
                                 <div class="card-header">
@@ -430,7 +570,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <div class="card mb-4">
+                            <div class="card">
                                 <div class="card-header">
                                     <h5 class="mb-0">Kesimpulan Analisis</h5>
                                 </div>
@@ -472,62 +612,11 @@
                                     </div>
                                 </div>
                             </div>
-
-                            ${hake_analysis ? `
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">Analisis Hake (Normalized Gain)</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row text-center mb-3">
-                                        <div class="col-4">
-                                            <div class="border rounded p-2">
-                                                <small class="text-muted">Pretest</small>
-                                                <div class="h5 mb-0">${hake_analysis.pretest}</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="border rounded p-2">
-                                                <small class="text-muted">Posttest</small>
-                                                <div class="h5 mb-0">${hake_analysis.posttest}</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="border rounded p-2">
-                                                <small class="text-muted">Gain</small>
-                                                <div class="h5 mb-0">${hake_analysis.gain_simple}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="text-center mb-3">
-                                        <div class="mb-2">
-                                            <span class="text-muted">Normalized Gain (g):</span>
-                                        </div>
-                                        <div class="h3 mb-2">${hake_analysis.normalized_gain}</div>
-                                        <span class="badge consistency-badge hake-category ${hake_analysis.hake_category.toLowerCase()}">${hake_analysis.hake_category}</span>
-                                    </div>
-
-                                    <div class="alert alert-info">
-                                        <h6>Kriteria Hake:</h6>
-                                        <ul class="mb-0 small">
-                                            <li>g ≥ 0.7 = <strong>Tinggi</strong></li>
-                                            <li>0.3 ≤ g < 0.7 = <strong>Sedang</strong></li>
-                                            <li>g < 0.3 = <strong>Rendah</strong></li>
-                                        </ul>
-                                    </div>
-
-                                    <div class="mt-3">
-                                        <p class="small text-muted">${hake_analysis.interpretation}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            ` : ''}
                         </div>
                     </div>
 
                     <div class="row mt-4">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
                                     <h5 class="mb-0">Matriks Perbandingan</h5>
@@ -569,7 +658,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
                                     <h5 class="mb-0">Matriks Normalisasi</h5>
@@ -610,68 +699,24 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">Uji Konsistensi Matriks</h5>
-                                    <span class="badge consistency-badge ${consistency_ratio.is_consistent ? 'bg-success' : 'bg-warning'}">${consistency_ratio.consistency_level}</span>
-                                </div>
-                                <div class="card-body">
-                                    <div class="mb-3">
-                                        <h6>Langkah Perhitungan:</h6>
-                                        <small class="text-muted">
-                                            ${consistency_ratio.detailed_steps.step1}
-                                        </small>
-                                        <div class="mt-2">
-                                            <small>
-                                                • Minat: ${consistency_ratio.detailed_steps.step2.minat}<br>
-                                                • Motivasi: ${consistency_ratio.detailed_steps.step2.motivasi}<br>
-                                                • Observasi: ${consistency_ratio.detailed_steps.step2.observasi}
-                                            </small>
-                                        </div>
-                                        <div class="mt-2">
-                                            <small><strong>λ_max:</strong> ${consistency_ratio.detailed_steps.step3}</small>
-                                        </div>
-                                    </div>
-
-                                    <hr>
-
-                                    <div class="row text-center">
-                                        <div class="col-4">
-                                            <small class="text-muted">CI</small>
-                                            <div class="h6">${consistency_ratio.ci}</div>
-                                        </div>
-                                        <div class="col-4">
-                                            <small class="text-muted">RI</small>
-                                            <div class="h6">${consistency_ratio.ri}</div>
-                                        </div>
-                                        <div class="col-4">
-                                            <small class="text-muted">CR</small>
-                                            <div class="h6 ${consistency_ratio.cr < 0.1 ? 'text-success' : 'text-warning'}">${consistency_ratio.cr}</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-3">
-                                        <div class="alert ${consistency_ratio.is_consistent ? 'alert-success' : 'alert-warning'} py-2">
-                                            <small>
-                                                ${consistency_ratio.is_consistent ? 
-                                                    '<i class="bi bi-check-circle"></i> Matriks konsisten (CR < 0.1)' : 
-                                                    '<i class="bi bi-exclamation-triangle"></i> Perlu review konsistensi (CR ≥ 0.1)'
-                                                }
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
+
+
                 </div>
             </div>
             `;
 
             $('#individuResults').removeClass('d-none').html(html);
         }
+        
+        
+
+        // Clear search when clicking outside
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.autocomplete').length) {
+                $('#autocompleteResults').empty();
+            }
+        });
     });
 </script>
 @endpush
