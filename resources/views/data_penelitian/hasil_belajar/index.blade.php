@@ -98,7 +98,7 @@
                                         @forelse ($dataHasilBelajar as $data)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $data->siswa->nama }}</td>
+                                                <td>{{ $data->siswa }}</td>
                                                 <td>{{ $data->kelas->name }}</td>
                                                 <td>{{ $data->pretest }}</td>
                                                 <td>{{ $data->posttest }}</td>

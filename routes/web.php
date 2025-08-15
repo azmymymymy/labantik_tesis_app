@@ -61,10 +61,12 @@ Route::middleware(['auth'])->group(function () {
         ->name('angket-motivasi.daftar');
     Route::resource('ahp-kelompok', AhpKelompokController::class);
     Route::resource('ahp', AhpIndividuController::class);
-    Route::get('/ahp/search-siswa', [AhpIndividuController::class, 'searchSiswa']);
-    Route::get('/ahp/calculate/{siswa_id}', [AhpIndividuController::class, 'calculateAHP']);
-    Route::get('/ahp/bulk-analysis', [AhpIndividuController::class, 'bulkAnalysis']);
+    Route::get('/individu', [AhpIndividuController::class, 'index'])->name('ahp.individu.index');
+    Route::get('/search-siswa', [AhpIndividuController::class, 'searchSiswa'])->name('ahp.search-siswa');
+    Route::get('/calculate/{siswa_id}', [AhpIndividuController::class, 'calculateAHP'])->name('ahp.calculate');
+    Route::get('/siswa-list', [AhpIndividuController::class, 'getSiswaList'])->name('ahp.siswa-list');
+    Route::get('/bulk-analysis', [AhpIndividuController::class, 'bulkAnalysis'])->name('ahp.bulk-analysis');
+
     // Route untuk mendapatkan daftar semua siswa
     Route::resource('angket-minat', AngketMinatController::class);
-    Route::get('/ahp/siswa-list', [AhpIndividuController::class, 'getSiswaList']);
 });
