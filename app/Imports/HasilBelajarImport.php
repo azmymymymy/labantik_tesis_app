@@ -32,8 +32,16 @@ class HasilBelajarImport implements ToModel, WithHeadingRow
     }
     public function model(array $row)
     {
-        $kelas = Kelas::firstOrCreate(['name', $row['kelas']], []);
-        $siswa = Siswa::firstOrCreate(['nama', $row['nama']], ['kelas_id', $kelas->id]);
+        $kelas = Kelas::firstOrCreate(
+            ['name' => $row['kelas']],
+            [] // default values jika tidak ditemukan
+        );
+
+        $siswa = Siswa::firstOrCreate(
+            ['nama' => $row['nama']],
+            ['kelas_id' => $kelas->id] // default values
+        );
+
 
         return new Hasil_belajar([
             'siswa_id'      => $siswa->id,
